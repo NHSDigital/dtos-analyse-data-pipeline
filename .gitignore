@@ -40,10 +40,13 @@ azure-pipelines.yml
 *.azure-pipelines/
 *.azcli
 *.azconfig
+<<<<<<< HEAD
 local.settings.json
 
 # Local Settings
 .env
+=======
+>>>>>>> 62c85b6 (DTOSS-8695: add foundryRelayFunction and associated code)
 
 # Azurite (Azure Storage Emulator)
 __azurite*.json
