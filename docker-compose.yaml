@@ -1,0 +1,52 @@
+name: dtos-analyse-data-pipeline
+
+# Define application network
+networks:
+  app-network:
+    driver: ${DOCKER_NETWORK_TYPE} # Use environment variable for network type bridge for macOS and Linux, host for Windows
+
+# Define application services
+services:
+  azurite:
+    container_name: azurite
+    restart: on-failure
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --silent
+    networks:
+      - app-network
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+  azurite-setup:
+    container_name: azurite-setup
+    restart: on-failure
+    build:
+      context: ./scripts
+      dockerfile: ./azurite/Dockerfile
+    depends_on:
+      - azurite
+    networks:
+      - app-network
+    environment:
+      - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
+      - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
+      - AZURITE_POISON_CONTAINER_NAME=${AZURITE_POISON_CONTAINER_NAME}
+
+  foundry-relay-function:
+    container_name: foundry-relay-function
+    restart: always
+    build:
+      context: ./src/FoundryIntegrationService
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+    ports:
+      - "7071:7071"
+    environment:
+      - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
+      - FUNCTIONS_WORKER_RUNTIME=python
+      - FOUNDRY_API_URL=${FOUNDRY_API_URL}
+      - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
+      - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
