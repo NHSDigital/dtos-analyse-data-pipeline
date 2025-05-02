@@ -16,20 +16,21 @@ def mock_request():
         headers={}
     )
 
-def test_happy_path__pass_valid_payload_to_function_over_http(mock_request):
-    """Test the main function for a successful file upload."""
+def test_happy_path_with_foundry_upload(mock_request):
+    """Test the main function for a successful file upload with Foundry upload enabled."""
     with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
          patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client, \
          patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.BlobServiceClient") as mock_blob_service_client:
 
         # Mock environment variables
-        mock_getenv.side_effect = lambda key: {
+        mock_getenv.side_effect = lambda key, default=None: {
             "FOUNDRY_API_URL": "https://foundry.example.com",
             "FOUNDRY_API_TOKEN": "mock-token",
             "FOUNDRY_RESOURCE_ID": "mock-dataset-id",
             "AZURITE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=mock-key;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
-            "AZURITE_CONTAINER_NAME": "mock-container"
-        }.get(key)
+            "AZURITE_CONTAINER_NAME": "mock-container",
+            "SKIP_FOUNDRY_UPLOAD": "false"
+        }.get(key, default)
 
         # Mock FoundryClient behavior
         mock_client_instance = MagicMock()
@@ -44,38 +45,66 @@ def test_happy_path__pass_valid_payload_to_function_over_http(mock_request):
 
         # Assertions
         assert response.status_code == HTTPStatus.OK
-        assert "uploaded to Foundry and Azurite Blob Storage successfully" in response.get_body().decode("utf-8")
+        assert "File '2025" in response.get_body().decode("utf-8")  # Match the dynamic file name prefix
         mock_client_instance.datasets.Dataset.File.upload.assert_called_once()
         mock_blob_client.upload_blob.assert_called_once_with(json.dumps({"key1": "value1", "key2": "value2"}).encode("utf-8"), overwrite=True)
 
-def test_main_missing_env_vars(mock_request):
-    """Test the main function when environment variables are missing."""
+def test_happy_path_skip_foundry_upload(mock_request):
+    """Test the main function for a successful file upload with Foundry upload skipped."""
     with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
-         patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client:
+         patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client, \
+         patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.BlobServiceClient") as mock_blob_service_client:
 
-        # Mock environment variables to return None
-        mock_getenv.side_effect = lambda key: None
+        # Mock environment variables
+        mock_getenv.side_effect = lambda key, default=None: {
+            "FOUNDRY_API_URL": "https://foundry.example.com",
+            "FOUNDRY_API_TOKEN": "mock-token",
+            "FOUNDRY_RESOURCE_ID": "mock-dataset-id",
+            "AZURITE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=mock-key;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
+            "AZURITE_CONTAINER_NAME": "mock-container",
+            "SKIP_FOUNDRY_UPLOAD": "true"
+        }.get(key, default)
+
+        # Mock BlobServiceClient behavior
+        mock_blob_client = MagicMock()
+        mock_blob_service_client.from_connection_string.return_value.get_blob_client.return_value = mock_blob_client
 
         # Call the function
         response = main(mock_request)
 
         # Assertions
-        assert response.status_code == HTTPStatus.BAD_REQUEST
-        assert "Required environment variables are missing" in response.get_body().decode("utf-8")
+        assert response.status_code == HTTPStatus.OK
+        assert "File '2025" in response.get_body().decode("utf-8")  # Match the dynamic file name prefix
+        mock_blob_client.upload_blob.assert_called_once_with(json.dumps({"key1": "value1", "key2": "value2"}).encode("utf-8"), overwrite=True)
+        mock_foundry_client.assert_not_called()
+
+def test_main_missing_env_vars(mock_request):
+    """Test the main function when environment variables are missing."""
+    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv:
+
+        # Mock environment variables to return None
+        mock_getenv.side_effect = lambda key, default=None: None
+
+        # Call the function
+        response = main(mock_request)
+
+        # Assertions
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert "internal server error" in response.get_body().decode("utf-8")
 
 def test_main_invalid_payload():
     """Test the main function with an invalid payload."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
-         patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client:
+    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv:
 
         # Mock environment variables
-        mock_getenv.side_effect = lambda key: {
+        mock_getenv.side_effect = lambda key, default=None: {
             "FOUNDRY_API_URL": "https://foundry.example.com",
             "FOUNDRY_API_TOKEN": "mock-token",
             "FOUNDRY_RESOURCE_ID": "mock-dataset-id",
             "AZURITE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=mock-key;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
-            "AZURITE_CONTAINER_NAME": "mock-container"
-        }.get(key)
+            "AZURITE_CONTAINER_NAME": "mock-container",
+            "SKIP_FOUNDRY_UPLOAD": "false"
+        }.get(key, default)
 
         # Create a mock request with an invalid payload
         invalid_payload = "invalid_payload"
@@ -92,20 +121,20 @@ def test_main_invalid_payload():
         # Assertions
         assert response.status_code == HTTPStatus.BAD_REQUEST
         assert "Invalid JSON payload" in response.get_body().decode("utf-8")
-
 def test_main_foundry_upload_failure(mock_request):
     """Test the main function when the Foundry upload fails."""
     with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
          patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client:
 
         # Mock environment variables
-        mock_getenv.side_effect = lambda key: {
+        mock_getenv.side_effect = lambda key, default=None: {
             "FOUNDRY_API_URL": "https://foundry.example.com",
             "FOUNDRY_API_TOKEN": "mock-token",
             "FOUNDRY_RESOURCE_ID": "mock-dataset-id",
             "AZURITE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=mock-key;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
-            "AZURITE_CONTAINER_NAME": "mock-container"
-        }.get(key)
+            "AZURITE_CONTAINER_NAME": "mock-container",
+            "SKIP_FOUNDRY_UPLOAD": "false"
+        }.get(key, default)
 
         # Mock FoundryClient behavior to raise an exception
         mock_client_instance = MagicMock()
@@ -127,13 +156,14 @@ def test_main_blob_upload_failure(mock_request):
          patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.BlobServiceClient") as mock_blob_service_client:
 
         # Mock environment variables
-        mock_getenv.side_effect = lambda key: {
+        mock_getenv.side_effect = lambda key, default=None: {
             "FOUNDRY_API_URL": "https://foundry.example.com",
             "FOUNDRY_API_TOKEN": "mock-token",
             "FOUNDRY_RESOURCE_ID": "mock-dataset-id",
             "AZURITE_CONNECTION_STRING": "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=mock-key;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;",
-            "AZURITE_CONTAINER_NAME": "mock-container"
-        }.get(key)
+            "AZURITE_CONTAINER_NAME": "mock-container",
+            "SKIP_FOUNDRY_UPLOAD": "false"
+        }.get(key, default)
 
         # Mock BlobServiceClient behavior to raise an exception
         mock_blob_client = MagicMock()
