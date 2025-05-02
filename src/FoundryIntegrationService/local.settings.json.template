@@ -8,6 +8,7 @@
     "FOUNDRY_API_URL": "example",
     "FOUNDRY_API_TOKEN": "example",
     "AZURITE_CONNECTION_STRING": "example",
-    "AZURITE_CONTAINER_NAME": "inbound"
+    "AZURITE_CONTAINER_NAME": "inbound",
+    "SKIP_FOUNDRY_UPLOAD": "true"
   }
 }

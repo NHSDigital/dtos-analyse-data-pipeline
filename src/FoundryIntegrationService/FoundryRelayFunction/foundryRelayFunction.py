@@ -29,9 +29,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         dataset_rid = os.getenv("FOUNDRY_RESOURCE_ID")
         azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
         azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
+        skip_foundry_upload = os.getenv("SKIP_FOUNDRY_UPLOAD", "false").lower() == "true"
 
-        if not foundry_url or not api_token or not dataset_rid:
-            raise EnvironmentError("Required environment variables are missing.")
+        # Log the value of SKIP_FOUNDRY_UPLOAD
+        logger.info(f"SKIP_FOUNDRY_UPLOAD is set to: {skip_foundry_upload}")
+
 
         if not azurite_connection_string or not azurite_container_name:
             raise EnvironmentError("Azurite Blob Storage configuration is missing.")
@@ -45,25 +47,31 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         file_name = generate_file_name()
         content = json.dumps(payload)
 
-        # Upload to Foundry
-        try:
-            logger.info(f"Uploading file '{file_name}' to Foundry dataset resource ID: {dataset_rid}...")
-            client = FoundryClient(
-                auth=UserTokenAuth(api_token),
-                hostname=foundry_url
-            )
-            client.datasets.Dataset.File.upload(
-                dataset_rid=dataset_rid,
-                file_path=file_name,
-                body=content.encode("utf-8")
-            )
-            logger.info(f"File '{file_name}' uploaded to Foundry successfully.")
-        except Exception as foundry_error:
-            logger.error(f"Failed to upload file to Foundry: {foundry_error}")
-            return func.HttpResponse(
-                "Failed to upload file to Foundry.",
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR
-            )
+        # Conditionally upload to Foundry
+        if not skip_foundry_upload:
+            try:
+                if not foundry_url or not api_token or not dataset_rid:
+                    raise EnvironmentError("Required Foundry environment variables are missing.")
+
+                logger.info(f"Uploading file '{file_name}' to Foundry dataset resource ID: {dataset_rid}...")
+                client = FoundryClient(
+                    auth=UserTokenAuth(api_token),
+                    hostname=foundry_url
+                )
+                client.datasets.Dataset.File.upload(
+                    dataset_rid=dataset_rid,
+                    file_path=file_name,
+                    body=content.encode("utf-8")
+                )
+                logger.info(f"File '{file_name}' uploaded to Foundry successfully.")
+            except Exception as foundry_error:
+                logger.error(f"Failed to upload file to Foundry: {foundry_error}")
+                return func.HttpResponse(
+                    "Failed to upload file to Foundry.",
+                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR
+                )
+        else:
+            logger.info("Skipping Foundry upload as per configuration.")
 
         # Upload to Azurite Blob Storage
         try:
@@ -81,7 +89,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         return func.HttpResponse(
-            f"File '{file_name}' uploaded to Foundry and Azurite Blob Storage successfully.",
+            f"File '{file_name}' uploaded successfully.",
             status_code=HTTPStatus.OK
         )
 
