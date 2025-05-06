@@ -63,6 +63,7 @@ services:
       dockerfile: Dockerfile
     networks:
       - app-network
+      - sb-emulator
     ports:
       - "7071:7071"
     environment:
@@ -71,6 +72,9 @@ services:
       - FOUNDRY_API_URL=${FOUNDRY_API_URL}
       - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
       - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
+      - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
+      - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
+      - SKIP_FOUNDRY_UPLOAD=${SKIP_FOUNDRY_UPLOAD}
 
 networks:
   sb-emulator:
