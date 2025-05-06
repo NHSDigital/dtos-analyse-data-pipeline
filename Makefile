@@ -64,6 +64,14 @@ run-unit-tests: # Run all unit tests with pytest
 	pytest
 	@echo "Unit tests completed."
 
+local-pipeline-service-bus-fdp: # Run a local Azure Function App with containers and test it
+	@echo "Starting the local Azure Function App pipeline..."
+	@echo "Step 1: Standing up all containers..."
+	make standup-containers
+	@echo "Step 2: Sending a POST request to the Foundry Relay Function..."
+	make curl-relay-function
+	@echo "Local pipeline execution completed."
+
 # ==============================================================================
 
 ${VERBOSE}.SILENT: \
@@ -75,4 +83,6 @@ ${VERBOSE}.SILENT: \
 	build-containers \
 	standup-containers \
 	curl-relay-function \
-	run-unit-tests
+	curl-relay-function-100 \
+	run-unit-tests \
+	local-pipeline-service-bus-fdp
