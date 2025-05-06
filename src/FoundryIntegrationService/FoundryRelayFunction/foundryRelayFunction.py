@@ -46,6 +46,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         file_name = generate_file_name()
         content = json.dumps(payload)
+        upload_destinations = []
 
         # Conditionally upload to Foundry
         if not skip_foundry_upload:
@@ -64,6 +65,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                     body=content.encode("utf-8")
                 )
                 logger.info(f"File '{file_name}' uploaded to Foundry successfully.")
+                upload_destinations.append("Foundry")
             except Exception as foundry_error:
                 logger.error(f"Failed to upload file to Foundry: {foundry_error}")
                 return func.HttpResponse(
@@ -81,6 +83,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
             blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
             logger.info(f"File '{file_name}' uploaded to Azurite Blob Storage successfully.")
+            upload_destinations.append("Azurite Blob Storage")
         except Exception as blob_error:
             logger.error(f"Failed to upload file to Azurite Blob Storage: {blob_error}")
             return func.HttpResponse(
@@ -88,11 +91,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=HTTPStatus.INTERNAL_SERVER_ERROR
             )
 
+        # Return success response
         return func.HttpResponse(
-            f"File '{file_name}' uploaded successfully.",
+            f"File '{file_name}' uploaded successfully to: {', '.join(upload_destinations)}.",
             status_code=HTTPStatus.OK
         )
-
+    # Handle exceptions
     except EnvironmentError as env_err:
         logger.error(f"Environment variables configuration error: {env_err}")
         return func.HttpResponse(
