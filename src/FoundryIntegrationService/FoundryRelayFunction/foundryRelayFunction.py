@@ -93,7 +93,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Return success response
         return func.HttpResponse(
-            f"File '{file_name}' uploaded successfully to: {', '.join(upload_destinations)}.",
+            f"File '{file_name}' uploaded successfully to: {', '.join(upload_destinations)}. ",
             status_code=HTTPStatus.OK
         )
     # Handle exceptions
