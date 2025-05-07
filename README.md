@@ -92,10 +92,10 @@ There is a requirement to allow us to be able to test out the analyse data pipel
 podman-compose -f docker-compose.yaml up -d
 ```
 
-This should bring up two services, both sqledge and servicebus-emulator: -
+This should bring up two services, both `sqledge` and `servicebus-emulator`: -
 
 ```shell
-alastairlock@Alastairs-MacBook-Pro dtos-analyse-data-pipeline % podman ps
+% podman ps
 CONTAINER ID  IMAGE                                                         COMMAND               CREATED      STATUS      PORTS                                                     NAMES
 e4c9e73d3610  mcr.microsoft.com/mssql/server:2022-latest                    /opt/mssql/bin/sq...  4 hours ago  Up 4 hours  1433/tcp                                                  sqledge
 7226f76cd694  mcr.microsoft.com/azure-messaging/servicebus-emulator:latest                        4 hours ago  Up 4 hours  0.0.0.0:5300->5300/tcp, 0.0.0.0:5672->5672/tcp, 8080/tcp  servicebus-emulator
@@ -105,23 +105,55 @@ If the components have been successfully deployed, you can test the setup using 
 service-bus-producer.py: Sends a message to queue.1 on the Azure Service Bus emulator.
 service-bus-consumer.py: Listens for and receives messages from queue.1.
 
-
-1. Run the producer script
+Run the producer script
 This sends a test message to the queue.
 
 ```shell
-(venv) alastairlock@Alastairs-MacBook-Pro docker % python3 service-bus-producer.py
+(venv) % python3 service-bus-producer.py
 Message sent.
-(venv) alastairlock@Alastairs-MacBook-Pro docker %
+(venv) %
 ```
 
-2. Run the consumer script
+Run the consumer script
 This will pick up and display the message.
 
 ```shell
-(venv) alastairlock@Alastairs-MacBook-Pro docker % python3 service-bus-consumer.py
+(venv) % python3 service-bus-consumer.py
 Listening for messages...
 Received: Hello from local sender!
+```
+
+Please note that it might be necessary to purge the docker images between starting and stopping `podman-compose`. This can be achieved via doing commands:-
+
+```shell
+(venv) % podman-compose -f docker-compose.yaml down
+servicebus-emulator
+sqledge
+servicebus-emulator
+sqledge
+af571ddd5671ac646e503ccea11b8fde16edc7ad65a918e7af1d7d4a29d4d434
+microsoft-azure-servicebus-emulator_sb-emulator
+(venv) %
+```
+
+Then find the image IDs which need to be removed: -
+
+```shell
+(venv) % podman images
+REPOSITORY                                             TAG          IMAGE ID      CREATED       SIZE
+mcr.microsoft.com/azure-messaging/servicebus-emulator  latest       77e64bec8af0  8 weeks ago   225 MB
+mcr.microsoft.com/mssql/server                         2022-latest  2b41d0be8283  2 months ago  1.66 GB
+```
+
+Then remove the images using command `podman image rm <IMAGE ID>`
+
+```shell
+(venv) % podman image rm 77e64bec8af0 2b41d0be8283
+Untagged: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+Untagged: mcr.microsoft.com/mssql/server:2022-latest
+Deleted: 77e64bec8af06eee8ba4952311cd16b9e360b8da1d3a9f501191ac1ba4f11f74
+Deleted: 2b41d0be82839692f678a709e8b7dd6106ee4776b0e70759c59b067730058b04
+
 ```
 
 ## Design
