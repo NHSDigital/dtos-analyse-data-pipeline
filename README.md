@@ -23,6 +23,7 @@ Make use of this repository template to expedite your project setup and enhance 
     - [Configuration](#configuration)
   - [Usage](#usage)
     - [Testing](#testing)
+    - [Azure Service Bus docker emulator](#azure-service-bus-docker-emulator)
   - [Design](#design)
     - [Diagrams](#diagrams)
     - [Modularity](#modularity)
@@ -82,6 +83,46 @@ After a successful installation, provide an informative example of how this proj
 ### Testing
 
 There are `make` tasks for you to configure to run your tests.  Run `make test` to see how they work.  You should be able to use the same entry points for local development as in your CI pipeline.
+
+### Azure Service Bus docker emulator
+
+There is a requirement to allow us to be able to test out the analyse data pipeline locally. To do this we have created an Azure Service bus emulator. To test this out you will have to run: -
+
+```shell
+podman-compose -f docker-compose.yaml up -d
+```
+
+This should bring up two services, both sqledge and servicebus-emulator: -
+
+```shell
+alastairlock@Alastairs-MacBook-Pro dtos-analyse-data-pipeline % podman ps
+CONTAINER ID  IMAGE                                                         COMMAND               CREATED      STATUS      PORTS                                                     NAMES
+e4c9e73d3610  mcr.microsoft.com/mssql/server:2022-latest                    /opt/mssql/bin/sq...  4 hours ago  Up 4 hours  1433/tcp                                                  sqledge
+7226f76cd694  mcr.microsoft.com/azure-messaging/servicebus-emulator:latest                        4 hours ago  Up 4 hours  0.0.0.0:5300->5300/tcp, 0.0.0.0:5672->5672/tcp, 8080/tcp  servicebus-emulator
+```
+
+If the components have been successfully deployed, you can test the setup using two Python scripts located in the scripts/docker directory:
+service-bus-producer.py: Sends a message to queue.1 on the Azure Service Bus emulator.
+service-bus-consumer.py: Listens for and receives messages from queue.1.
+
+
+1. Run the producer script
+This sends a test message to the queue.
+
+```shell
+(venv) alastairlock@Alastairs-MacBook-Pro docker % python3 service-bus-producer.py
+Message sent.
+(venv) alastairlock@Alastairs-MacBook-Pro docker %
+```
+
+2. Run the consumer script
+This will pick up and display the message.
+
+```shell
+(venv) alastairlock@Alastairs-MacBook-Pro docker % python3 service-bus-consumer.py
+Listening for messages...
+Received: Hello from local sender!
+```
 
 ## Design
 

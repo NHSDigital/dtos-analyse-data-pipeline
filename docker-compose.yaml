@@ -21,7 +21,9 @@ services:
           - "sb-emulator"
   sqledge:
         container_name: "sqledge"
-        image: "mcr.microsoft.com/azure-sql-edge:latest"
+        # Azure-sql-edge has problems, instead use server:2022
+        # image: "mcr.microsoft.com/azure-sql-edge:latest"
+        image: mcr.microsoft.com/mssql/server:2022-latest
         networks:
           sb-emulator:
             aliases:
