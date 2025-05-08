@@ -109,7 +109,7 @@ Run the producer script
 This sends a test message to the queue.
 
 ```shell
-(venv) % python3 service-bus-producer.py
+(venv) % python3 scripts/docker/service-bus-producer.py
 Message sent.
 (venv) %
 ```
@@ -118,7 +118,7 @@ Run the consumer script
 This will pick up and display the message.
 
 ```shell
-(venv) % python3 service-bus-consumer.py
+(venv) % python3 scripts/docker/service-bus-consumer.py
 Listening for messages...
 Received: Hello from local sender!
 ```
