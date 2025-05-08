@@ -40,6 +40,24 @@ shutdown-local-containers: # Shutdown all containers defined in docker-compose.y
 
 # ==============================================================================
 
+# Local development targets
+
+# TODO - tidy this when integrating with others in https://nhsd-jira.digital.nhs.uk/browse/DTOSS-8699
+action ?= start
+local-environment: # Local containerised development environment: action=[start, stop, default is 'start'] @Development
+	if [ "$(action)" = "start" ]; then \
+			echo "Starting local environment..."; \
+			docker compose -f infrastructure/environments/local/docker-compose.yaml up -d --build; \
+	elif [ "$(action)" = "stop" ]; then \
+			echo "Stopping local environment..."; \
+			docker compose -f infrastructure/environments/local/docker-compose.yaml down; \
+	else \
+			echo "Unknown action: '$(action)'. Use 'start' or 'stop'."; \
+			exit 1; \
+	fi
+
+# ==============================================================================
+
 ${VERBOSE}.SILENT: \
 	build \
 	clean \
@@ -48,3 +66,4 @@ ${VERBOSE}.SILENT: \
 	deploy \
 
 
+	local-environment
