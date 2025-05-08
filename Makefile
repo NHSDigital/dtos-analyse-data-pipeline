@@ -30,16 +30,28 @@ config:: # Configure development environment (main) @Configuration
 
 # Custom targets for local development and testing
 
+install-dependencies: # Install dependencies needed to build and test the project
+	@echo "Installing dependencies..."
+	@echo "Installing Python dependencies..."
+	pip install -r src/FoundryIntegrationService/requirements.txt
+	@echo "Installing Node.js dependencies..."
+	npm install
+	@echo "All dependencies are installed."
 
-build-containers: # Build all containers defined in docker-compose.yaml
+build-local-containers: # Build all containers defined in docker-compose.yaml
 	@echo "Building all containers using Podman Compose..."
 	podman compose build
 	@echo "All containers are now built."
 
-standup-containers: # Start all containers defined in docker-compose.yaml
+standup-local-containers: # Start all containers defined in docker-compose.yaml
 	@echo "Starting all containers using Podman Compose..."
 	podman compose up -d
 	@echo "All containers are now running."
+
+stop-local-containers: # Stop all containers defined in docker-compose.yaml
+	@echo "Stopping all containers using Podman Compose..."
+	podman compose down
+	@echo "All containers are now stopped."
 
 curl-relay-function: # Send a POST request to the Foundry Relay Function
 	@echo "Testing the Foundry Relay Function with curl..."
@@ -80,9 +92,4 @@ ${VERBOSE}.SILENT: \
 	config \
 	dependencies \
 	deploy \
-	build-containers \
-	standup-containers \
-	curl-relay-function \
-	curl-relay-function-100 \
-	run-unit-tests \
-	local-pipeline-service-bus-fdp
+
