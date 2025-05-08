@@ -85,6 +85,5 @@ services:
 
 networks:
   sb-emulator:
-    driver: ${DOCKER_NETWORK_TYPE} # Use environment variable for network type bridge for macOS and Linux, host for Windows
   app-network:
     driver: ${DOCKER_NETWORK_TYPE} # Use environment variable for network type bridge for macOS and Linux, host for Windows

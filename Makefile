@@ -34,9 +34,7 @@ install-dependencies: # Install dependencies needed to build and test the projec
 	@echo "Installing dependencies..."
 	@echo "Installing Python dependencies..."
 	pip install -r src/FoundryIntegrationService/requirements.txt
-	@echo "Installing Node.js dependencies..."
-	npm install
-	@echo "All dependencies are installed."
+	@echo "All project dependencies are installed."
 
 build-local-containers: # Build all containers defined in docker-compose.yaml
 	@echo "Building all containers using Podman Compose..."
@@ -83,6 +81,16 @@ local-pipeline-service-bus-fdp: # Run a local Azure Function App with containers
 	@echo "Step 2: Sending a POST request to the Foundry Relay Function..."
 	make curl-relay-function
 	@echo "Local pipeline execution completed."
+
+write-service-bus-emulator: # Write to the Service Bus Emulator
+	@echo "Writing to the Service Bus Emulator..."
+	python scripts/docker/service-bus-producer.py
+	@echo "Wrote to Service Bus Emulator."
+
+read-service-bus-emulator: # Read from the Service Bus Emulator
+	@echo "Reading from the Service Bus Emulator..."
+	python scripts/docker/service-bus-consumer.py
+	@echo "Read from Service Bus Emulator."
 
 # ==============================================================================
 
