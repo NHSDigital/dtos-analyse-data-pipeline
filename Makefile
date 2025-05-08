@@ -77,7 +77,7 @@ run-unit-tests: # Run all unit tests with pytest
 local-pipeline-service-bus-fdp: # Run a local Azure Function App with containers and test it
 	@echo "Starting the local Azure Function App pipeline..."
 	@echo "Step 1: Standing up all containers..."
-	make standup-containers
+	make standup-local-containers
 	@echo "Step 2: Sending a POST request to the Foundry Relay Function..."
 	make curl-relay-function
 	@echo "Local pipeline execution completed."
