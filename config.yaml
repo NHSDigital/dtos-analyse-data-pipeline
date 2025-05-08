@@ -89,7 +89,7 @@
                                 {
                                   "FilterType": "Correlation",
                                   "CorrelationFilter":
-                                    { "Properties": { "prop3": "value3" } },
+                                    { "Properties": { "prop1": "value1" } },
                                 },
                             },
                           ],
