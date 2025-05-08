@@ -87,6 +87,14 @@ write-service-bus-emulator: # Write to the Service Bus Emulator
 	python scripts/docker/service-bus-producer.py
 	@echo "Wrote to Service Bus Emulator."
 
+write-service-bus-emulator-10: # Write 10 messages to the Service Bus Emulator
+	@echo "Writing 10 messages to the Service Bus Emulator..."
+		for i in {1..10}; do \
+				echo "Sending message $$i..."; \
+				python scripts/docker/service-bus-producer.py; \
+		done
+		@echo "10 messages written to the Service Bus Emulator."
+
 read-service-bus-emulator: # Read from the Service Bus Emulator
 	@echo "Reading from the Service Bus Emulator..."
 	python scripts/docker/service-bus-consumer.py
