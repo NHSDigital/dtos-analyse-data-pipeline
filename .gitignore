@@ -6,6 +6,8 @@
 *vulnerabilities*report*.json
 *report*json.zip
 .version
+venv/
+.env
 
 *.code-workspace
 !project.code-workspace

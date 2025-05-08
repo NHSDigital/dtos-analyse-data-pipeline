@@ -26,6 +26,18 @@ config:: # Configure development environment (main) @Configuration
 	# TODO: Use only 'make' targets that are specific to this project, e.g. you may not need to install Node.js
 	make _install-dependencies
 
+# Custom targets for local development and testing
+
+standup-local-containers: # Start all containers defined in docker-compose.yaml
+	@echo "Starting all containers using Podman Compose..."
+	podman-compose up -d
+	@echo "All containers are now running."
+
+shutdown-local-containers: # Shutdown all containers defined in docker-compose.yaml
+	@echo "Shutdown all containers using Podman Compose..."
+	podman-compose down
+	@echo "All containers are now down."
+
 # ==============================================================================
 
 ${VERBOSE}.SILENT: \
@@ -34,3 +46,5 @@ ${VERBOSE}.SILENT: \
 	config \
 	dependencies \
 	deploy \
+
+
