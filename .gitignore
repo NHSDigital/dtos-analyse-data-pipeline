@@ -41,6 +41,8 @@ azure-pipelines.yml
 *.azcli
 *.azconfig
 local.settings.json
+
+# Local Settings
 .env
 
 # Azurite (Azure Storage Emulator)
