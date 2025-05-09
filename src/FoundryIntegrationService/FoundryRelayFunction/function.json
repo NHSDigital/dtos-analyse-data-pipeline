@@ -5,7 +5,7 @@
       "direction": "in",
       "name": "serviceBusMessage",
       "queueName": "queue.1",
-      "connection": "SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION"
+      "connection": "SERVICE_BUS_CONNECTION_STR"
     }
   ]
 }

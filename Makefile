@@ -38,27 +38,27 @@ install-dependencies: # Install dependencies needed to build and test the projec
 
 build-local-containers: # Build all containers defined in docker-compose.yaml
 	@echo "Building all containers..."
-	docker compose build
+	podman compose build
 	@echo "All containers are now built."
 
 standup-local-containers: # Start all containers defined in docker-compose.yaml
 	@echo "Starting all containers..."
-	docker compose up -d
+	podman compose up -d
 	@echo "All containers are now running."
 
 stop-local-containers: # Stop all containers defined in docker-compose.yaml
 	@echo "Stopping all containers..."
-	docker compose down
+	podman compose down
 	@echo "All containers are now stopped."
 
 remove-container-images: # Remove all container images
 	@echo "Removing all container images..."
-	docker rmi -a -f
+	podman rmi -a -f
 	@echo "All container images have been removed."
 
 prune-unused-images: # Prune all unused container images
 		@echo "Pruning all unused container images..."
-		docker image prune -a -f
+		podman image prune -a -f
 		@echo "All unused container images have been pruned."
 
 curl-relay-function: # Send a POST request to the Foundry Relay Function

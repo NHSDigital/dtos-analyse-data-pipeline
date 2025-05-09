@@ -17,9 +17,9 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
         try:
             message_body = serviceBusMessage.get_body().decode("utf-8")
             payload = json.loads(message_body)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as json_error:
             logger.error("Invalid JSON payload.")
-            return
+            raise ValueError("Invalid JSON payload.") from json_error
 
         # Validate environment variables
         foundry_url = os.getenv("FOUNDRY_API_URL")
@@ -36,7 +36,7 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
 
         if not isinstance(payload, dict):
             logger.error("Invalid payload format. Expected a JSON object.")
-            return
+            raise ValueError("Invalid payload format. Expected a JSON object.")
 
         file_name = generate_file_name()
         content = json.dumps(payload)
@@ -62,7 +62,7 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
                 upload_destinations.append("Foundry")
             except Exception as foundry_error:
                 logger.error(f"Failed to upload file to Foundry: {foundry_error}")
-                return
+                raise RuntimeError("Failed to upload file to Foundry.") from foundry_error
 
         else:
             logger.info("Skipping Foundry upload as per configuration.")
@@ -78,13 +78,16 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
             upload_destinations.append("Azurite Blob Storage")
         except Exception as blob_error:
             logger.error(f"Failed to upload file to Azurite Blob Storage: {blob_error}")
-            return
+            raise RuntimeError("Failed to upload file to Azurite Blob Storage.") from blob_error
 
         logger.info(f"File '{file_name}' uploaded successfully to: {', '.join(upload_destinations)}.")
     except EnvironmentError as env_err:
         logger.error(f"Environment variables configuration error: {env_err}")
+        raise
     except Exception as e:
         logger.error(f"An error occurred: {e}", exc_info=True)
+        raise
+
 
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
