@@ -2,7 +2,6 @@ import json
 import logging
 import os
 from datetime import datetime
-from http import HTTPStatus
 from uuid import uuid4
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
@@ -10,18 +9,17 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
-    logger.info('Foundry file upload function triggered.')
+def main(serviceBusMessage: func.ServiceBusMessage) -> None:
+    logger.info('Foundry file upload function triggered by Service Bus.')
 
     try:
         # Attempt to parse the JSON payload
         try:
-            payload = req.get_json()
+            message_body = serviceBusMessage.get_body().decode("utf-8")
+            payload = json.loads(message_body)
         except json.JSONDecodeError:
-            return func.HttpResponse(
-                "Invalid JSON payload.",
-                status_code=HTTPStatus.BAD_REQUEST
-            )
+            logger.error("Invalid JSON payload.")
+            return
 
         # Validate environment variables
         foundry_url = os.getenv("FOUNDRY_API_URL")
@@ -31,18 +29,14 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
         skip_foundry_upload = os.getenv("SKIP_FOUNDRY_UPLOAD", "false").lower() == "true"
 
-        # Log the value of SKIP_FOUNDRY_UPLOAD
         logger.info(f"SKIP_FOUNDRY_UPLOAD is set to: {skip_foundry_upload}")
-
 
         if not azurite_connection_string or not azurite_container_name:
             raise EnvironmentError("Azurite Blob Storage configuration is missing.")
 
         if not isinstance(payload, dict):
-            return func.HttpResponse(
-                "Invalid payload format. Expected a JSON object.",
-                status_code=HTTPStatus.BAD_REQUEST
-            )
+            logger.error("Invalid payload format. Expected a JSON object.")
+            return
 
         file_name = generate_file_name()
         content = json.dumps(payload)
@@ -68,10 +62,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 upload_destinations.append("Foundry")
             except Exception as foundry_error:
                 logger.error(f"Failed to upload file to Foundry: {foundry_error}")
-                return func.HttpResponse(
-                    "Failed to upload file to Foundry.",
-                    status_code=HTTPStatus.INTERNAL_SERVER_ERROR
-                )
+                return
+
         else:
             logger.info("Skipping Foundry upload as per configuration.")
 
@@ -86,29 +78,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             upload_destinations.append("Azurite Blob Storage")
         except Exception as blob_error:
             logger.error(f"Failed to upload file to Azurite Blob Storage: {blob_error}")
-            return func.HttpResponse(
-                "Failed to upload file to Azurite Blob Storage.",
-                status_code=HTTPStatus.INTERNAL_SERVER_ERROR
-            )
+            return
 
-        # Return success response
-        return func.HttpResponse(
-            f"File '{file_name}' uploaded successfully to: {', '.join(upload_destinations)}. ",
-            status_code=HTTPStatus.OK
-        )
-    # Handle exceptions
+        logger.info(f"File '{file_name}' uploaded successfully to: {', '.join(upload_destinations)}.")
     except EnvironmentError as env_err:
         logger.error(f"Environment variables configuration error: {env_err}")
-        return func.HttpResponse(
-            str(env_err),
-            status_code=HTTPStatus.BAD_REQUEST
-        )
     except Exception as e:
         logger.error(f"An error occurred: {e}", exc_info=True)
-        return func.HttpResponse(
-            "An internal server error occurred.",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR
-        )
 
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

@@ -1,16 +1,11 @@
 {
   "bindings": [
     {
-      "authLevel": "anonymous",
-      "type": "httpTrigger",
+      "type": "serviceBusTrigger",
       "direction": "in",
-      "name": "req",
-      "methods": ["post"]
-    },
-    {
-      "type": "http",
-      "direction": "out",
-      "name": "$return"
+      "name": "serviceBusMessage",
+      "queueName": "queue.1",
+      "connection": "SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION"
     }
   ]
 }

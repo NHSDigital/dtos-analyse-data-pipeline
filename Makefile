@@ -37,19 +37,29 @@ install-dependencies: # Install dependencies needed to build and test the projec
 	@echo "All project dependencies are installed."
 
 build-local-containers: # Build all containers defined in docker-compose.yaml
-	@echo "Building all containers using Podman Compose..."
-	podman compose build
+	@echo "Building all containers..."
+	docker compose build
 	@echo "All containers are now built."
 
 standup-local-containers: # Start all containers defined in docker-compose.yaml
-	@echo "Starting all containers using Podman Compose..."
-	podman compose up -d
+	@echo "Starting all containers..."
+	docker compose up -d
 	@echo "All containers are now running."
 
 stop-local-containers: # Stop all containers defined in docker-compose.yaml
-	@echo "Stopping all containers using Podman Compose..."
-	podman compose down
+	@echo "Stopping all containers..."
+	docker compose down
 	@echo "All containers are now stopped."
+
+remove-container-images: # Remove all container images
+	@echo "Removing all container images..."
+	docker rmi -a -f
+	@echo "All container images have been removed."
+
+prune-unused-images: # Prune all unused container images
+		@echo "Pruning all unused container images..."
+		docker image prune -a -f
+		@echo "All unused container images have been pruned."
 
 curl-relay-function: # Send a POST request to the Foundry Relay Function
 	@echo "Testing the Foundry Relay Function with curl..."
@@ -94,6 +104,19 @@ write-service-bus-emulator-10: # Write 10 messages to the Service Bus Emulator
 				python scripts/docker/service-bus-producer.py; \
 		done
 		@echo "10 messages written to the Service Bus Emulator."
+
+write-service-bus-emulator-payload: # Write to the Service Bus Emulator
+	@echo "Writing payload to the Service Bus Emulator..."
+	python scripts/docker/service-bus-producer-payload.py
+	@echo "Wrote payload to Service Bus Emulator."
+
+write-service-bus-emulator-payload-10: # Write 10 payload messages to the Service Bus Emulator
+	@echo "Writing 10 payload messages to the Service Bus Emulator..."
+		for i in {1..10}; do \
+				echo "Sending payload message $$i..."; \
+				python scripts/docker/service-bus-producer-payload.py; \
+		done
+		@echo "10 payload messages written to the Service Bus Emulator."
 
 read-service-bus-emulator: # Read from the Service Bus Emulator
 	@echo "Reading from the Service Bus Emulator..."
