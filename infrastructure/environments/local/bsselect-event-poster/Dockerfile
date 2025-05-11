@@ -5,6 +5,6 @@ FROM python:3
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# COPY event_posting.py .
+COPY event_poster.py .
 
-CMD [ "python", "./infrastructure/environments/local/bsselect-event-poster/event_poster.py" ]
+CMD [ "python", "event_poster.py" ]

@@ -11,6 +11,12 @@ services:
       - 5432:5432
     volumes:
       - ./infrastructure/environments/local/bsselect-postgres-setup/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
 
   bsselect-event-poster:
     build:
@@ -19,7 +25,9 @@ services:
     container_name: bsselect-event-poster
     env_file: .env
     depends_on:
-      - bsselect-db
+      bsselect-db:
+        condition: service_healthy
+
 
 #   emulator:
 #     container_name: "servicebus-emulator"
