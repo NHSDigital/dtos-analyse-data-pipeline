@@ -1,35 +1,57 @@
-name: microsoft-azure-servicebus-emulator
+version: '3.9'
+
+
 services:
-  emulator:
-    container_name: "servicebus-emulator"
-    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
-    volumes:
-      - "${CONFIG_PATH}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+
+  bsselect-db:
+    image: postgres:latest
+    container_name: bsselect-db
+    env_file: .env
     ports:
-      - "5672:5672"
-      - "5300:5300"
-    environment:
-      SQL_SERVER: sqledge
-      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
-      ACCEPT_EULA: ${ACCEPT_EULA}
-      SQL_WAIT_INTERVAL: ${SQL_WAIT_INTERVAL}
+      - 5432:5432
+    volumes:
+      - ./infrastructure/environments/local/bsselect-postgres-setup/:/docker-entrypoint-initdb.d/
+
+  bsselect-event-poster:
+    build:
+      context: ./infrastructure/environments/local/bsselect-event-poster
+      dockerfile: Dockerfile
+    container_name: bsselect-event-poster
+    env_file: .env
     depends_on:
-      - sqledge
-    networks:
-      sb-emulator:
-        aliases:
-          - "sb-emulator"
-  sqledge:
-        container_name: "sqledge"
-        # Azure-sql-edge has problems, instead use server:2022
-        # image: "mcr.microsoft.com/azure-sql-edge:latest"
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        networks:
-          sb-emulator:
-            aliases:
-              - "sqledge"
-        environment:
-          ACCEPT_EULA: ${ACCEPT_EULA}
-          MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
-networks:
-  sb-emulator:
+      - bsselect-db
+
+#   emulator:
+#     container_name: "servicebus-emulator"
+#     image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+#     volumes:
+#       - "${CONFIG_PATH}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+#     ports:
+#       - "5672:5672"
+#       - "5300:5300"
+#     environment:
+#       SQL_SERVER: sqledge
+#       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+#       ACCEPT_EULA: ${ACCEPT_EULA}
+#       SQL_WAIT_INTERVAL: ${SQL_WAIT_INTERVAL}
+#     depends_on:
+#       - sqledge
+#     networks:
+#       sb-emulator:
+#         aliases:
+#           - "sb-emulator"
+#   sqledge:
+#         container_name: "sqledge"
+#         # Azure-sql-edge has problems, instead use server:2022
+#         # image: "mcr.microsoft.com/azure-sql-edge:latest"
+#         image: mcr.microsoft.com/mssql/server:2022-latest
+#         networks:
+#           sb-emulator:
+#             aliases:
+#               - "sqledge"
+#         environment:
+#           ACCEPT_EULA: ${ACCEPT_EULA}
+#           MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+
+# networks:
+#   sb-emulator:
