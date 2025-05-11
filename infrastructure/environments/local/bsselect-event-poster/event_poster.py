@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-NSP_URL = "http://host.docker.internal:8080" # os.environ.get("NSP_SERVICE_LAYER_URL")
+NSP_URL = os.environ.get("NSP_SERVICE_LAYER_URL")
 
 # Connect to your database
 conn = psycopg2.connect(
