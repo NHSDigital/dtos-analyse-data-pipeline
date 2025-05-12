@@ -40,11 +40,8 @@ while True:
     conn.poll()
     while conn.notifies:
         notify = conn.notifies.pop(0)
-        # Parse the JSON payload and pretty print it
         data = json.loads(notify.payload)
-        print(json.dumps(data, indent=2))
-
-
-        result = requests.post(NSP_URL, json = notify.payload)
+        headers = { "Content-Type": "application/json"}
+        result = requests.post(NSP_URL, data=json.dumps(data), headers=headers)
 
         print('result is ', result)

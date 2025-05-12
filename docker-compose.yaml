@@ -17,6 +17,10 @@ services:
       retries: 5
       start_period: 5s
       timeout: 5s
+    networks:
+      sb-emulator:
+        aliases:
+          - "sb-emulator"
 
   bsselect-event-poster:
     build:
@@ -25,7 +29,7 @@ services:
     container_name: bsselect-event-poster
     env_file: .env
     depends_on:
-      - sqledge
+      - bsselect-db
     networks:
       sb-emulator:
         aliases:
