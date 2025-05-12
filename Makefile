@@ -125,7 +125,7 @@ read-service-bus-emulator: # Read from the Service Bus Emulator
 
 # ==============================================================================
 
-# Local development targets
+# Local development
 
 # TODO - tidy this when integrating with others in https://nhsd-jira.digital.nhs.uk/browse/DTOSS-8699
 action ?= start
@@ -149,6 +149,4 @@ ${VERBOSE}.SILENT: \
 	config \
 	dependencies \
 	deploy \
-
-
 	local-environment
