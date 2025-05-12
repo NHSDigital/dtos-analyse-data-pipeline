@@ -27,8 +27,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Validate environment variables
         connection_str = os.getenv("SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION")
-        connection_str = "Endpoint=sb://servicebus-emulator;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
-
         queue_name = os.getenv("QUEUE_NAME")
 
         if not connection_str:
@@ -43,12 +41,12 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             client = ServiceBusClient.from_connection_string(connection_str)
             with client:
-                sender = client.get_queue_sender(queue_name="queue.1")
+                sender = client.get_queue_sender(queue_name=queue_name)
                 with sender:
                     try:
-                        print("Alastair sender ")
-                        print(payload)
-                        message = ServiceBusMessage("Hello from container sender!")
+                        json_message = json.dumps(payload)
+                        print(json_message)
+                        message = ServiceBusMessage(json_message)
                         sender.send_messages(message)
                          # Return success response
                         return func.HttpResponse(

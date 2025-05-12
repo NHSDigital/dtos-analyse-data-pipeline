@@ -68,6 +68,13 @@ curl-relay-function: # Send a POST request to the Foundry Relay Function
 	--data @src/FoundryIntegrationService/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
+curl-service-layer-function: # Send a POST request to the Foundry Relay Function
+	@echo "Testing the Foundry Relay Function with curl..."
+	curl -X POST http://localhost:7072/api/ServicebusRelayFunction \
+	-H "Content-Type: application/json" \
+	--data @src/FoundryIntegrationService/payload.json
+	@echo "Request sent. Check the logs or response for details."
+
 curl-relay-function-100: # Send 100 POST requests to the Foundry Relay Function
 	@echo "Sending 100 POST requests to the Foundry Relay Function..."
 	for i in {1..100}; do \
