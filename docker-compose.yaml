@@ -1,0 +1,99 @@
+name: dtos-analyse-data-pipeline
+version: "3.8"
+
+services:
+
+  bsselect-db:
+    image: postgres:latest
+    container_name: bsselect-db
+    env_file: .env
+    ports:
+      - 5432:5432
+    volumes:
+      - ./infrastructure/environments/local/bsselect-postgres-setup/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}", "-h", "localhost"]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      timeout: 5s
+
+  bsselect-event-poster:
+    build:
+      context: ./infrastructure/environments/local/bsselect-event-poster
+      dockerfile: Dockerfile
+    container_name: bsselect-event-poster
+    env_file: .env
+    depends_on:
+      - sqledge
+    networks:
+      sb-emulator:
+        aliases:
+          - "sb-emulator"
+  sqledge:
+    container_name: "sqledge"
+    # Azure-sql-edge has problems, instead use server:2022
+    # image: "mcr.microsoft.com/azure-sql-edge:latest"
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    networks:
+      sb-emulator:
+        aliases:
+          - "sqledge"
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+
+  azurite:
+    container_name: azurite
+    restart: on-failure
+    image: mcr.microsoft.com/azure-storage/azurite
+    command: azurite --blobHost 0.0.0.0 --blobPort 10000 --queueHost 0.0.0.0 --queuePort 10001 --tableHost 0.0.0.0 --tablePort 10002 --silent
+    networks:
+      - app-network
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+
+  azurite-setup:
+    container_name: azurite-setup
+    restart: on-failure
+    build:
+      context: ./scripts
+      dockerfile: ./azurite/Dockerfile
+    depends_on:
+      - azurite
+    networks:
+      - app-network
+    environment:
+      - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
+      - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
+      - AZURITE_POISON_CONTAINER_NAME=${AZURITE_POISON_CONTAINER_NAME}
+
+  foundry-relay-function:
+    container_name: foundry-relay-function
+    restart: always
+    build:
+      context: ./src/FoundryIntegrationService
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+      - sb-emulator
+    ports:
+      - "7071:7071"
+    environment:
+      - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
+      - FUNCTIONS_WORKER_RUNTIME=python
+      - FOUNDRY_API_URL=${FOUNDRY_API_URL}
+      - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
+      - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
+      - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
+      - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
+      - SKIP_FOUNDRY_UPLOAD=${SKIP_FOUNDRY_UPLOAD}
+      - ASPNETCORE_URLS=http://0.0.0.0:7071
+      - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
+
+networks:
+  sb-emulator:
+  app-network:
+    driver: ${DOCKER_NETWORK_TYPE} # Use environment variable for network type bridge for macOS and Linux, host for Windows
