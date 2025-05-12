@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsServiceBus": "example",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AZURITE_CONNECTION_STRING": "example",
+    "AZURITE_CONTAINER_NAME": "inbound",
+    "SKIP_FOUNDRY_UPLOAD": "true"
+  }
+}

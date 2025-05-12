@@ -30,10 +30,48 @@ services:
       sb-emulator:
         aliases:
           - "sb-emulator"
+
+  servicebus-relay-function:
+    container_name: servicebus-relay-function
+    restart: always
+    build:
+      context: ./src/ServiceBusIntegrationService
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+      - sb-emulator
+    ports:
+      - "7072:7072"
+    environment:
+      - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
+      - SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
+      - FUNCTIONS_WORKER_RUNTIME=python
+      - QUEUE_NAME=${QUEUE_NAME}
+      - ASPNETCORE_URLS=http://0.0.0.0:7072
+
+  emulator:
+    container_name: "servicebus-emulator"
+    image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
+    volumes:
+      - "${CONFIG_PATH}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+    ports:
+      - "5672:5672"
+      - "5300:5300"
+    environment:
+      SQL_SERVER: sqledge
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      SQL_WAIT_INTERVAL: ${SQL_WAIT_INTERVAL}
+    depends_on:
+      - sqledge
+    networks:
+      sb-emulator:
+        aliases:
+          - "sb-emulator"
+
   sqledge:
     container_name: "sqledge"
     # Azure-sql-edge has problems, instead use server:2022
-    # image: "mcr.microsoft.com/azure-sql-edge:latest"
     image: mcr.microsoft.com/mssql/server:2022-latest
     networks:
       sb-emulator:
@@ -42,6 +80,29 @@ services:
     environment:
       ACCEPT_EULA: ${ACCEPT_EULA}
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+
+  foundry-relay-function:
+    container_name: foundry-relay-function
+    restart: always
+    build:
+      context: ./src/FoundryIntegrationService
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+      - sb-emulator
+    ports:
+      - "7071:7071"
+    environment:
+      - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
+      - FUNCTIONS_WORKER_RUNTIME=python
+      - FOUNDRY_API_URL=${FOUNDRY_API_URL}
+      - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
+      - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
+      - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
+      - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
+      - SKIP_FOUNDRY_UPLOAD=${SKIP_FOUNDRY_UPLOAD}
+      - ASPNETCORE_URLS=http://0.0.0.0:7071
+      - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
 
   azurite:
     container_name: azurite
@@ -69,29 +130,6 @@ services:
       - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
       - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
       - AZURITE_POISON_CONTAINER_NAME=${AZURITE_POISON_CONTAINER_NAME}
-
-  foundry-relay-function:
-    container_name: foundry-relay-function
-    restart: always
-    build:
-      context: ./src/FoundryIntegrationService
-      dockerfile: Dockerfile
-    networks:
-      - app-network
-      - sb-emulator
-    ports:
-      - "7071:7071"
-    environment:
-      - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
-      - FUNCTIONS_WORKER_RUNTIME=python
-      - FOUNDRY_API_URL=${FOUNDRY_API_URL}
-      - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
-      - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
-      - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
-      - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
-      - SKIP_FOUNDRY_UPLOAD=${SKIP_FOUNDRY_UPLOAD}
-      - ASPNETCORE_URLS=http://0.0.0.0:7071
-      - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
 
 networks:
   sb-emulator:
