@@ -13,4 +13,41 @@ venv/
 !project.code-workspace
 
 # Please, add your custom content below!
+
+
+# Python Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.env/
+.venv/
+
+# Logs and Cache
+*.log
+.pytest_cache/
+.cache
+
+# Test Results
+coverage/
+*.coverage
+*.cover
+*.coverage.*
+
+# Azure Development
+azure-pipelines.yml
+*.azure-pipelines/
+*.azcli
+*.azconfig
+local.settings.json
+
+# Local Settings
 .env
+
+# Azurite (Azure Storage Emulator)
+__azurite*.json
+__blobstorage__
+__queuestorage__
+
+
