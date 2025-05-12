@@ -2,7 +2,7 @@
 
 ## Overview
 
-TODO - as part of end-to-end run: https://nhsd-jira.digital.nhs.uk/browse/DTOSS-8699
+TODO - as part of end-to-end run [ticket](https://nhsd-jira.digital.nhs.uk/browse/DTOSS-8699)
 
 ### Postgres
 
@@ -14,7 +14,7 @@ To test event emission in postgres:
 - LISTEN for changes to the subjects table: `LISTEN subjects;`
 - Run CRUD operations to cause notification events:
 
-```
+```sql
 INSERT INTO subjects (name, age) VALUES ('Kate', 40);
 INSERT INTO subjects (name, age) VALUES ('Elizabeth', 35);
 UPDATE subjects SET age=99 WHERE ID = 1;
