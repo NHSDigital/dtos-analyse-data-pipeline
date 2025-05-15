@@ -4,7 +4,6 @@ services:
   bsselect-db:
     image: postgres:latest
     container_name: bsselect-db
-    env_file: .env
     ports:
       - 5432:5432
     volumes:
@@ -25,6 +24,11 @@ services:
       retries: 5
       start_period: 5s
       timeout: 5s
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
     networks:
       sb-emulator:
         aliases:
@@ -35,7 +39,11 @@ services:
       context: ./infrastructure/environments/local/bsselect-event-poster
       dockerfile: Dockerfile
     container_name: bsselect-event-poster
-    env_file: .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
     depends_on:
       - bsselect-db
     networks:
@@ -65,7 +73,9 @@ services:
     container_name: "servicebus-emulator"
     image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
     volumes:
-      - "${CONFIG_PATH}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+      # - "${CONFIG_PATH}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+      - "${CONFIG_PATH:-./default-config/Config.json}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+
     ports:
       - "5672:5672"
       - "5300:5300"
