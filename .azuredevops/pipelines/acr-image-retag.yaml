@@ -18,9 +18,9 @@ parameters:
     displayName: Source Container Registry
     type: string
     values:
-      - acrukshubdevserins
-      - acrukshubprodserins
-    default: acrukshubdevserins
+      - acrukshubdevadp
+      - acrukshubprodadp
+    default: acrukshubdevadp
 
   - name: selectImageTag
     displayName: Select Image Tag
@@ -36,9 +36,9 @@ parameters:
     displayName: Destination Container Registry
     type: string
     values:
-      - acrukshubdevserins
-      - acrukshubprodserins
-    default: acrukshubdevserins
+      - acrukshubdevadp
+      - acrukshubprodadp
+    default: acrukshubdevadp
 
   - name: addImageTag
     displayName: Target Image Tag
@@ -70,4 +70,4 @@ stages:
     steps:
       - template: .azuredevops/templates/steps/acr-import-retag.yaml@dtos-devops-templates
         parameters:
-          serviceConnection: sc-service-insights-prod
+          serviceConnection: sc-Analyse-Data-Pipelines-prod
