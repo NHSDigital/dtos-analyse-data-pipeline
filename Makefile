@@ -104,11 +104,11 @@ write-service-bus-emulator-payload: # Write payload messages to the Service Bus 
 	python scripts/docker/service-bus-producer-payload.py
 	@echo "Wrote payload to Service Bus Emulator."
 
-insert-sample-subjects: # Insert sample subjects into the database to trigger the pipeline
-	@echo "Inserting sample subjects into the database to trigger the pipeline..."
-	./insert_sample_subjects.sh
-	@echo "Sample subjects inserted."
-	@echo "Check the local Azurite storage blob for new data."
+insert-sample-data: # Insert sample data into the database to trigger the pipeline
+	@echo "Inserting sample data into the database using script..."
+	set -o allexport; source .env; set +o allexport; ./insert_sample_data.sh
+	@echo "Sample data inserted."
+
 
 # ==============================================================================
 
