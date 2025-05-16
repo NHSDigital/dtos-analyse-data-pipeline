@@ -38,27 +38,27 @@ install-dependencies: # Install dependencies needed to build and test the projec
 
 build-local-containers: # Build all containers defined in docker-compose.yaml
 	@echo "Building all containers..."
-	podman compose build
+	docker compose build
 	@echo "All containers are now built."
 
 standup-local-containers: # Start all containers defined in docker-compose.yaml
 	@echo "Starting all containers..."
-	podman compose up -d
+	docker compose up -d
 	@echo "All containers are now running."
 
 stop-local-containers: # Stop all containers defined in docker-compose.yaml
 	@echo "Stopping all containers..."
-	podman compose down
+	docker compose down
 	@echo "All containers are now stopped."
 
 remove-container-images: # Remove all container images
 	@echo "Removing all container images..."
-	podman rmi -a -f
+	docker rmi -a -f
 	@echo "All container images have been removed."
 
 prune-unused-images: # Prune all unused container images
 		@echo "Pruning all unused container images..."
-		podman image prune -a -f
+		docker image prune -a -f
 		@echo "All unused container images have been pruned."
 
 curl-relay-function: # Send a POST request to the Foundry Relay Function
@@ -68,22 +68,12 @@ curl-relay-function: # Send a POST request to the Foundry Relay Function
 	--data @src/FoundryIntegrationService/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
-curl-service-layer-function: # Send a POST request to the Foundry Relay Function
+curl-service-layer-function: # Send a POST request to the Service Layer Function
 	@echo "Testing the Foundry Relay Function with curl..."
 	curl -X POST http://localhost:7072/api/ServicebusRelayFunction \
 	-H "Content-Type: application/json" \
 	--data @src/FoundryIntegrationService/payload.json
 	@echo "Request sent. Check the logs or response for details."
-
-curl-relay-function-100: # Send 100 POST requests to the Foundry Relay Function
-	@echo "Sending 100 POST requests to the Foundry Relay Function..."
-	for i in {1..100}; do \
-				echo "Sending request $$i..."; \
-				curl -X POST http://localhost:7071/api/FoundryRelayFunction \
-				-H "Content-Type: application/json" \
-				--data @src/FoundryIntegrationService/payload.json; \
-		done
-		@echo "100 requests sent. Check the logs or response for details."
 
 run-unit-tests: # Run all unit tests with pytest
 	@echo "Running all unit tests with pytest..."
@@ -91,12 +81,12 @@ run-unit-tests: # Run all unit tests with pytest
 	pytest
 	@echo "Unit tests completed."
 
-local-pipeline-service-bus-fdp: # Run a local Azure Function App with containers and test it
-	@echo "Starting the local Azure Function App pipeline..."
+local-pipeline-end-to-end-fdp: # Run a local Azure Function App with containers and test it
+	@echo "Starting the local Azure Function App pipeline end to end..."
 	@echo "Step 1: Standing up all containers..."
 	make standup-local-containers
-	@echo "Step 2: Sending a POST request to the Foundry Relay Function..."
-	make curl-relay-function
+	@echo "Step 2: Inserting sample subjects into the database..."
+	make insert-sample-subjects
 	@echo "Local pipeline execution completed."
 
 write-service-bus-emulator: # Write to the Service Bus Emulator
@@ -104,36 +94,21 @@ write-service-bus-emulator: # Write to the Service Bus Emulator
 	python scripts/docker/service-bus-producer.py
 	@echo "Wrote to Service Bus Emulator."
 
-write-service-bus-emulator-10: # Write 10 messages to the Service Bus Emulator
-	@echo "Writing 10 messages to the Service Bus Emulator..."
-		for i in {1..10}; do \
-				echo "Sending message $$i..."; \
-				python scripts/docker/service-bus-producer.py; \
-		done
-		@echo "10 messages written to the Service Bus Emulator."
-
-write-service-bus-emulator-payload: # Write to the Service Bus Emulator
-	@echo "Writing payload to the Service Bus Emulator..."
-	python scripts/docker/service-bus-producer-payload.py
-	@echo "Wrote payload to Service Bus Emulator."
-
-write-service-bus-emulator-payload-10: # Write 10 payload messages to the Service Bus Emulator
-	@echo "Writing 10 payload messages to the Service Bus Emulator..."
-		for i in {1..10}; do \
-				echo "Sending payload message $$i..."; \
-				python scripts/docker/service-bus-producer-payload.py; \
-		done
-		@echo "10 payload messages written to the Service Bus Emulator."
-
 read-service-bus-emulator: # Read from the Service Bus Emulator
 	@echo "Reading from the Service Bus Emulator..."
 	python scripts/docker/service-bus-consumer.py
 	@echo "Read from Service Bus Emulator."
 
-insert-sample-subjects:
-	@echo "Inserting sample subjects into the database using script..."
+write-service-bus-emulator-payload: # Write payload messages to the Service Bus Emulator
+	@echo "Writing payload to the Service Bus Emulator..."
+	python scripts/docker/service-bus-producer-payload.py
+	@echo "Wrote payload to Service Bus Emulator."
+
+insert-sample-subjects: # Insert sample subjects into the database to trigger the pipeline
+	@echo "Inserting sample subjects into the database to trigger the pipeline..."
 	./insert_sample_subjects.sh
 	@echo "Sample subjects inserted."
+	@echo "Check the local Azurite storage blob for new data."
 
 # ==============================================================================
 
