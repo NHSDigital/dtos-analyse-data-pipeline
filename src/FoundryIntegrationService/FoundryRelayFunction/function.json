@@ -4,7 +4,7 @@
       "type": "serviceBusTrigger",
       "direction": "in",
       "name": "serviceBusMessage",
-      "queueName": "queue.1",
+      "queueName": "%QUEUE_NAME%",
       "connection": "SERVICE_BUS_CONNECTION_STR"
     }
   ]
