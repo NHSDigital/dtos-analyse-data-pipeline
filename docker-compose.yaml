@@ -112,10 +112,7 @@ services:
       - QUEUE_NAME=${QUEUE_NAME}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
     deploy:
-      replicas: 3
-      # resources:
-      #   limits:
-      #     memory: 256M
+      replicas: 1
 
   azurite:
     container_name: azurite
