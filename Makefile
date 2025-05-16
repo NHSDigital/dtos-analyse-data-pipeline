@@ -130,6 +130,11 @@ read-service-bus-emulator: # Read from the Service Bus Emulator
 	python scripts/docker/service-bus-consumer.py
 	@echo "Read from Service Bus Emulator."
 
+insert-sample-subjects:
+	@echo "Inserting sample subjects into the database using script..."
+	./insert_sample_subjects.sh
+	@echo "Sample subjects inserted."
+
 # ==============================================================================
 
 # Local development

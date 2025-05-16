@@ -1,8 +1,7 @@
 name: dtos-analyse-data-pipeline
-version: "3.8"
+# version: "3.9"
 
 services:
-
   bsselect-db:
     image: postgres:latest
     container_name: bsselect-db
@@ -20,7 +19,7 @@ services:
     networks:
       sb-emulator:
         aliases:
-          - "sb-emulator"
+          - "bsselect-db"
 
   bsselect-event-poster:
     build:
@@ -33,7 +32,7 @@ services:
     networks:
       sb-emulator:
         aliases:
-          - "sb-emulator"
+          - "bsselect-event-poster"
 
   servicebus-relay-function:
     container_name: servicebus-relay-function
@@ -86,18 +85,22 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
   foundry-relay-function:
-    container_name: foundry-relay-function
+    # container_name: foundry-relay-function
     restart: always
     build:
       context: ./src/FoundryIntegrationService
       dockerfile: Dockerfile
+    depends_on:
+      - emulator
+      - azurite
     networks:
       - app-network
       - sb-emulator
-    ports:
-      - "7071:7071"
+    # ports:
+    #   - "7071:7071"
     environment:
       - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
+      - AzureWebJobsServiceBus=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
       - FUNCTIONS_WORKER_RUNTIME=python
       - FOUNDRY_API_URL=${FOUNDRY_API_URL}
       - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
@@ -106,7 +109,13 @@ services:
       - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
       - SKIP_FOUNDRY_UPLOAD=${SKIP_FOUNDRY_UPLOAD}
       - ASPNETCORE_URLS=http://0.0.0.0:7071
+      - QUEUE_NAME=${QUEUE_NAME}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
+    deploy:
+      replicas: 3
+      # resources:
+      #   limits:
+      #     memory: 256M
 
   azurite:
     container_name: azurite
