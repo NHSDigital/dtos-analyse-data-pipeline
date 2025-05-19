@@ -26,7 +26,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             )
 
         # Validate environment variables
-        connection_str = os.getenv("SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION")
+        connection_str = os.getenv("SERVICE_BUS_CONNECTION_STR")
         queue_name = os.getenv("QUEUE_NAME")
 
         if not connection_str:

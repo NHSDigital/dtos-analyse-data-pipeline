@@ -24,7 +24,7 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
         # Validate environment variables
         foundry_url = os.getenv("FOUNDRY_API_URL")
         api_token = os.getenv("FOUNDRY_API_TOKEN")
-        dataset_rid = os.getenv("FOUNDRY_RESOURCE_ID")
+        parent_folder_rid = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
         azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
         azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
         skip_foundry_upload = os.getenv("SKIP_FOUNDRY_UPLOAD", "false").lower() == "true"
@@ -45,20 +45,29 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
         # Conditionally upload to Foundry
         if not skip_foundry_upload:
             try:
-                if not foundry_url or not api_token or not dataset_rid:
+                if not foundry_url or not api_token or not parent_folder_rid:
                     raise EnvironmentError("Required Foundry environment variables are missing.")
 
-                logger.info(f"Uploading file '{file_name}' to Foundry dataset resource ID: {dataset_rid}...")
+                logger.info(f"Uploading file '{file_name}' to Foundry (parent folder RID: {parent_folder_rid})...")
                 client = FoundryClient(
                     auth=UserTokenAuth(api_token),
                     hostname=foundry_url
                 )
+
+                # Create the Foundry dataset before uploading
+                dataset_name = file_name.replace('.json', '')
+                dataset = client.datasets.Dataset.create(
+                    name=dataset_name,
+                    parent_folder_rid=parent_folder_rid
+                )
+
+                # Upload the file to the Foundry dataset
                 client.datasets.Dataset.File.upload(
-                    dataset_rid=dataset_rid,
+                    dataset_rid=dataset.rid,
                     file_path=file_name,
                     body=content.encode("utf-8")
                 )
-                logger.info(f"File '{file_name}' uploaded to Foundry successfully.")
+                logger.info(f"File '{file_name}' uploaded to Foundry successfully. Dataset RID: {dataset.rid}")
                 upload_destinations.append("Foundry")
             except Exception as foundry_error:
                 logger.error(f"Failed to upload file to Foundry: {foundry_error}")
@@ -73,6 +82,7 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
             blob_service_client = BlobServiceClient.from_connection_string(azurite_connection_string)
             blob_client = blob_service_client.get_blob_client(container=azurite_container_name, blob=file_name)
 
+            # Upload the file to Azurite Blob Storage
             blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
             logger.info(f"File '{file_name}' uploaded to Azurite Blob Storage successfully.")
             upload_destinations.append("Azurite Blob Storage")
