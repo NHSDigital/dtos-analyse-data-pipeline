@@ -46,7 +46,7 @@ cd nhs-england-tools/repository-template
 
 The following software packages, or their equivalents, are expected to be installed and configured:
 
-- [Docker](https://www.docker.com/) container runtime,
+- [Docker](https://www.docker.com/) container runtime, or a compatible tool, e.g. [Podman](https://podman.io/). Note that we refer to `docker` syntax here, for simplicity.
 - [asdf](https://asdf-vm.com/) version manager,
 - [GNU make](https://www.gnu.org/software/make/) 3.82 or later,
 
@@ -134,26 +134,6 @@ sqledge
 af571ddd5671ac646e503ccea11b8fde16edc7ad65a918e7af1d7d4a29d4d434
 microsoft-azure-servicebus-emulator_sb-emulator
 (venv) %
-```
-
-Then find the image IDs which need to be removed: -
-
-```shell
-(venv) % docker images
-REPOSITORY                                             TAG          IMAGE ID      CREATED       SIZE
-mcr.microsoft.com/azure-messaging/servicebus-emulator  latest       77e64bec8af0  8 weeks ago   225 MB
-mcr.microsoft.com/mssql/server                         2022-latest  2b41d0be8283  2 months ago  1.66 GB
-```
-
-Then remove the images using command `docker image rm <IMAGE ID>`
-
-```shell
-(venv) % docker image rm 77e64bec8af0 2b41d0be8283
-Untagged: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
-Untagged: mcr.microsoft.com/mssql/server:2022-latest
-Deleted: 77e64bec8af06eee8ba4952311cd16b9e360b8da1d3a9f501191ac1ba4f11f74
-Deleted: 2b41d0be82839692f678a709e8b7dd6106ee4776b0e70759c59b067730058b04
-
 ```
 
 ## Design
