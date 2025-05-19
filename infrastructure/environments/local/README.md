@@ -13,7 +13,6 @@ The process is as follows...
 TODO - describe the process in a few sentences.
 See [mural link](https://app.mural.co/t/nhsdigital8118/m/nhsdigital8118/1739874458977/c97dae9bbdd1a06d2abb16863a70f8b783acfc36?wid=0-1746632950738) for inspiration.
 
-
 ### Postgres
 
 To test event emission in postgres:
