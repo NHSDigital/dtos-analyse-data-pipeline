@@ -35,7 +35,8 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
         logger.info(f"SKIP_FOUNDRY_UPLOAD is set to: {skip_foundry_upload}")
 
         if not azurite_connection_string or not azurite_container_name:
-            raise EnvironmentError("Azurite Blob Storage configuration is missing.")
+            raise EnvironmentError(
+                "Azurite Blob Storage configuration is missing.")
 
         if not isinstance(payload, dict):
             logger.error("Invalid payload format. Expected a JSON object.")
@@ -77,7 +78,8 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
                 )
                 upload_destinations.append("Foundry")
             except Exception as foundry_error:
-                logger.error(f"Failed to upload file to Foundry: {foundry_error}")
+                logger.error(
+                    f"Failed to upload file to Foundry: {foundry_error}")
                 raise RuntimeError(
                     "Failed to upload file to Foundry."
                 ) from foundry_error
@@ -104,7 +106,8 @@ def main(serviceBusMessage: func.ServiceBusMessage) -> None:
             )
             upload_destinations.append("Azurite Blob Storage")
         except Exception as blob_error:
-            logger.error(f"Failed to upload file to Azurite Blob Storage: {blob_error}")
+            logger.error(
+                f"Failed to upload file to Azurite Blob Storage: {blob_error}")
             raise RuntimeError(
                 "Failed to upload file to Azurite Blob Storage."
             ) from blob_error
