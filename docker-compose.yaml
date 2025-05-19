@@ -1,5 +1,4 @@
 name: dtos-analyse-data-pipeline
-# version: "3.9"
 
 services:
   bsselect-db:
@@ -95,7 +94,6 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
   foundry-relay-function:
-    # container_name: foundry-relay-function
     restart: always
     build:
       context: ./src/FoundryIntegrationService
@@ -106,15 +104,12 @@ services:
     networks:
       - app-network
       - sb-emulator
-    # ports:
-    #   - "7071:7071"
     environment:
       - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
       - AzureWebJobsServiceBus=${SERVICE_BUS_CONNECTION_STR}
       - FUNCTIONS_WORKER_RUNTIME=python
       - FOUNDRY_API_URL=${FOUNDRY_API_URL}
       - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
-      - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
       - FOUNDRY_PARENT_FOLDER_RID=${FOUNDRY_PARENT_FOLDER_RID}
       - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
       - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
