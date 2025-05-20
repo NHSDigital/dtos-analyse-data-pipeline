@@ -1,7 +1,5 @@
 {
   "recommendations": [
-    "ms-azuretools.vscode-azurefunctions",
-    "ms-python.python",
     "alefragnani.bookmarks",
     "davidanson.vscode-markdownlint",
     "dbaeumer.vscode-eslint",
@@ -17,7 +15,10 @@
     "hediet.vscode-drawio",
     "johnpapa.vscode-peacock",
     "mhutchie.git-graph",
+    "ms-azuretools.vscode-azurefunctions",
     "ms-azuretools.vscode-containers",
+    "ms-python.black-formatter",
+    "ms-python.python",
     "ms-vscode-remote.remote-containers",
     "ms-vscode-remote.remote-wsl",
     "ms-vscode.hexeditor",
