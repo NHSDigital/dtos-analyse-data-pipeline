@@ -1,8 +1,6 @@
 name: dtos-analyse-data-pipeline
-version: "3.8"
 
 services:
-
   bsselect-db:
     image: postgres:latest
     container_name: bsselect-db
@@ -12,7 +10,17 @@ services:
     volumes:
       - ./infrastructure/environments/local/bsselect-postgres-setup/:/docker-entrypoint-initdb.d/
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}", "-h", "localhost"]
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-d",
+          "${POSTGRES_DB}",
+          "-h",
+          "localhost",
+        ]
       interval: 5s
       retries: 5
       start_period: 5s
@@ -20,7 +28,7 @@ services:
     networks:
       sb-emulator:
         aliases:
-          - "sb-emulator"
+          - "bsselect-db"
 
   bsselect-event-poster:
     build:
@@ -33,7 +41,7 @@ services:
     networks:
       sb-emulator:
         aliases:
-          - "sb-emulator"
+          - "bsselect-event-poster"
 
   servicebus-relay-function:
     container_name: servicebus-relay-function
@@ -48,7 +56,7 @@ services:
       - "7072:7072"
     environment:
       - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
-      - SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
+      - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
       - FUNCTIONS_WORKER_RUNTIME=python
       - QUEUE_NAME=${QUEUE_NAME}
       - ASPNETCORE_URLS=http://0.0.0.0:7072
@@ -86,27 +94,31 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
   foundry-relay-function:
-    container_name: foundry-relay-function
     restart: always
     build:
       context: ./src/FoundryIntegrationService
       dockerfile: Dockerfile
+    depends_on:
+      - emulator
+      - azurite
     networks:
       - app-network
       - sb-emulator
-    ports:
-      - "7071:7071"
     environment:
       - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
+      - AzureWebJobsServiceBus=${SERVICE_BUS_CONNECTION_STR}
       - FUNCTIONS_WORKER_RUNTIME=python
       - FOUNDRY_API_URL=${FOUNDRY_API_URL}
       - FOUNDRY_API_TOKEN=${FOUNDRY_API_TOKEN}
-      - FOUNDRY_RESOURCE_ID=${FOUNDRY_RESOURCE_ID}
+      - FOUNDRY_PARENT_FOLDER_RID=${FOUNDRY_PARENT_FOLDER_RID}
       - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
       - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
       - SKIP_FOUNDRY_UPLOAD=${SKIP_FOUNDRY_UPLOAD}
       - ASPNETCORE_URLS=http://0.0.0.0:7071
-      - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION}
+      - QUEUE_NAME=${QUEUE_NAME}
+      - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
+    deploy:
+      replicas: 3
 
   azurite:
     container_name: azurite
