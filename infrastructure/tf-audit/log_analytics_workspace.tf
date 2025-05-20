@@ -3,9 +3,9 @@ module "log_analytics_workspace_audit" {
 
   source = "../../../dtos-devops-templates/infrastructure/modules/log-analytics-workspace"
 
-  name     = module.regions_config[each.key].names.log-analytics-workspace
+  name                = module.regions_config[each.key].names.log-analytics-workspace
   resource_group_name = azurerm_resource_group.audit[each.key].name
-  location = each.key
+  location            = each.key
 
   law_sku        = var.law.law_sku
   retention_days = var.law.retention_days

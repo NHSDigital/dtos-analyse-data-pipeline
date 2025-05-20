@@ -200,6 +200,10 @@ variable "function_apps" {
         function_app_key = string
         endpoint_name    = optional(string, "")
       })), [])
+      env_vars_from_key_vault = optional(list(object({
+        env_var_name          = string
+        key_vault_secret_name = string
+      })), [])
       env_vars_static = optional(map(string), {})
       ip_restrictions = optional(map(object({
         headers = optional(list(object({

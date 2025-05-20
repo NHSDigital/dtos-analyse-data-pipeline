@@ -143,9 +143,8 @@ diagnostic_settings = {
 
 function_apps = {
   acr_mi_name = "dtos-analyse-data-pipeline-acr-push"
-  # acr_mi_name = "dtos-service-insights-acr-push"
-  acr_name    = "acrukshubdevaddppl"
-  acr_rg_name = "rg-hub-dev-uks-addppl"
+  acr_name    = "acrukshubdevandppl"
+  acr_rg_name = "rg-hub-dev-uks-andppl"
 
   app_insights_name                      = "appi-dev-uks-andppl"
   app_insights_rg_name                   = "rg-andppl-dev-uks-audit"
@@ -170,15 +169,23 @@ function_apps = {
 
   fa_config = {
 
-    CreateParticipantScreeningEpisodeData = {
-      name_suffix            = "create-ps-episode-data"
-      function_endpoint_name = "CreateParticipantScreeningEpisode"
+    serviceLayer = {
+      name_suffix            = "service-layer"
+      function_endpoint_name = "service-layer"
       app_service_plan_key   = "DefaultServicePlan"
-      db_connection_string   = "ServiceInsightsDbConnectionString"
+      env_vars_static = {
+        QUEUE_NAME               = "queue.1"
+        FUNCTIONS_WORKER_RUNTIME = "python"
+        ASPNETCORE_URLS          = "http://0.0.0.0:7072"
+      }
+      env_vars_from_key_vault = [
+        {
+          env_var_name          = "SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION"
+          key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR-CONTAINER-VERSION"
+        }
+      ]
     }
-
   }
-
 }
 
 function_app_slots = []
@@ -205,18 +212,6 @@ storage_accounts = {
       }
       inbound-poison = {
         container_name = "inbound-poison"
-      }
-    }
-  }
-
-  eventgrid = {
-    name_suffix                   = "eventgrid"
-    account_tier                  = "Standard"
-    replication_type              = "LRS"
-    public_network_access_enabled = false
-    containers = {
-      config = {
-        container_name = "deadletterqueue"
       }
     }
   }

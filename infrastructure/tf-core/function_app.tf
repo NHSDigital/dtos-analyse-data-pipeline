@@ -108,7 +108,9 @@ locals {
             # function == "example-function" ? {
             #   EXAMPLE_API_KEY = data.azurerm_key_vault_secret.example[region].versionless_id
             # } : {},
-
+            {
+              for obj in config.env_vars_from_key_vault : obj.env_var_name => "@Microsoft.KeyVault(SecretUri=${module.key_vault[region].key_vault_url}secrets/${obj.key_vault_secret_name})"
+            },
             # Dynamic references to other Function App URLs
             {
               for obj in config.app_urls : obj.env_var_name => format(
@@ -133,13 +135,6 @@ locals {
                 "${config.storage_account_env_var_name}__blobServiceUri"  = "https://${module.storage["file_exceptions-${region}"].storage_account_name}.blob.core.windows.net"
                 "${config.storage_account_env_var_name}__queueServiceUri" = "https://${module.storage["file_exceptions-${region}"].storage_account_name}.queue.core.windows.net"
               } : {}
-            ) : {},
-
-            length(try(config.event_grid_topic_producers, [])) > 0 ? merge(
-              {
-                for idx, producer in coalescelist(config.event_grid_topic_producers, []) :
-                "topicEndpoint${idx + 1}" => data.terraform_remote_state.hub.outputs.event_grid_topic["${producer}-${region}"].topic_endpoint
-              }
             ) : {},
 
             length(config.storage_containers) > 0 ? {
