@@ -2,7 +2,7 @@
 module "private_link_scoped_service_app_insights" {
   for_each = var.features.private_endpoints_enabled ? var.regions : {}
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/private-link-scoped-service"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/private-link-scoped-service"
 
   providers = {
     azurerm = azurerm.hub
@@ -19,7 +19,7 @@ module "private_link_scoped_service_app_insights" {
 module "private_link_scoped_service_law" {
   for_each = var.features.private_endpoints_enabled ? var.regions : {}
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/private-link-scoped-service"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/private-link-scoped-service"
 
   providers = {
     azurerm = azurerm.hub

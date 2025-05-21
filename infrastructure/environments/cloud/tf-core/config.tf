@@ -12,7 +12,7 @@ resource "azurerm_resource_group" "core" {
 module "regions_config" {
   for_each = var.regions
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/shared-config"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/shared-config"
 
   location    = each.key
   application = var.application

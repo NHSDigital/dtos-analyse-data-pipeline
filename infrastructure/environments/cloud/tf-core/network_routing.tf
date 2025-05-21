@@ -1,7 +1,7 @@
 module "firewall_policy_rule_collection_group" {
   for_each = var.routes
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/firewall-rule-collection-group"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/firewall-rule-collection-group"
 
   name               = "${module.regions_config[each.key].names.firewall}-policy-rule-collection-group"
   firewall_policy_id = data.terraform_remote_state.hub.outputs.firewall_policy_id[each.key]
@@ -25,7 +25,7 @@ module "firewall_policy_rule_collection_group" {
 module "route_table" {
   for_each = var.routes
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/route-table"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/route-table"
 
   name                = module.regions_config[each.key].names.route-table
   resource_group_name = azurerm_resource_group.rg_vnet[each.key].name
@@ -57,7 +57,7 @@ module "route_table_audit" {
     azurerm = azurerm.audit
   }
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/route-table"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/route-table"
 
   name                = module.regions_config[each.key].names.route-table
   resource_group_name = "${module.regions_config[each.key].names.resource-group}-audit-networking"

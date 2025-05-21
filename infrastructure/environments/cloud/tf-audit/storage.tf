@@ -1,15 +1,15 @@
 module "storage" {
   for_each = local.storage_accounts_map
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/storage"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/storage"
 
   name                = substr("${module.regions_config[each.value.region_key].names.storage-account}${lower(each.value.name_suffix)}", 0, 24)
-  resource_group_name = azurerm_resource_group.core[each.value.region_key].name
+  resource_group_name = azurerm_resource_group.audit[each.value.region_key].name
   location            = each.value.region_key
 
   containers = each.value.containers
 
-  log_analytics_workspace_id                              = data.terraform_remote_state.audit.outputs.log_analytics_workspace_id[local.primary_region]
+  log_analytics_workspace_id                              = module.log_analytics_workspace_audit[local.primary_region].id
   monitor_diagnostic_setting_storage_account_enabled_logs = local.monitor_diagnostic_setting_storage_account_enabled_logs
   monitor_diagnostic_setting_storage_account_metrics      = local.monitor_diagnostic_setting_storage_account_metrics
 
@@ -28,6 +28,11 @@ module "storage" {
     private_endpoint_resource_group_name = azurerm_resource_group.rg_private_endpoints[each.value.region_key].name
     private_service_connection_is_manual = var.features.private_service_connection_is_manual
   } : null
+
+  depends_on = [
+    module.peering_spoke_hub,
+    module.peering_hub_spoke
+  ]
 
   tags = var.tags
 }

@@ -18,7 +18,7 @@ locals {
 module "app-service-plan" {
   for_each = local.app_service_plans_map
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/app-service-plan"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/app-service-plan"
 
   name                = "${module.regions_config[each.value.region_key].names.app-service-plan}-${lower(each.value.asp_key)}"
   resource_group_name = azurerm_resource_group.core[each.value.region_key].name

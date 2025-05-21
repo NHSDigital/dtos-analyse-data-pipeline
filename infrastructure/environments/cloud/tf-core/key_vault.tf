@@ -1,7 +1,7 @@
 module "key_vault" {
   for_each = var.key_vault != {} ? var.regions : {}
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/key-vault"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/key-vault"
 
   name                = module.regions_config[each.key].names.key-vault
   resource_group_name = azurerm_resource_group.core[each.key].name

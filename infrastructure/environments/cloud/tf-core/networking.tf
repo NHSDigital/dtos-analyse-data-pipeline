@@ -15,7 +15,7 @@ resource "azurerm_resource_group" "rg_private_endpoints" {
 module "vnet" {
   for_each = var.regions
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/vnet"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/vnet"
 
   name                = module.regions_config[each.key].names.virtual-network
   resource_group_name = azurerm_resource_group.rg_vnet[each.key].name
@@ -69,7 +69,7 @@ locals {
 module "subnets" {
   for_each = local.subnets_map
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/subnet"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/subnet"
 
   name                              = each.value.subnet_name
   location                          = module.vnet[each.value.vnet_key].vnet.location
@@ -102,7 +102,7 @@ module "peering_spoke_hub" {
   # loop through regions and only create peering if connect_peering is set to true
   for_each = { for key, val in var.regions : key => val if val.connect_peering == true }
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/vnet-peering"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/vnet-peering"
 
   name                = "${module.regions_config[each.key].names.virtual-network}-to-hub-peering"
   resource_group_name = azurerm_resource_group.rg_vnet[each.key].name
@@ -123,7 +123,7 @@ module "peering_hub_spoke" {
     azurerm = azurerm.hub
   }
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/vnet-peering"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/vnet-peering"
 
   name                = "hub-to-${module.regions_config[each.key].names.virtual-network}-peering"
   resource_group_name = data.terraform_remote_state.hub.outputs.vnets_hub[each.key].vnet.resource_group_name

@@ -1,7 +1,7 @@
 module "functionapp" {
   for_each = local.function_app_map
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/function-app"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/function-app"
 
   function_app_name   = "${module.regions_config[each.value.region].names.function-app}-si-${lower(each.value.name_suffix)}"
   resource_group_name = azurerm_resource_group.core[each.value.region].name

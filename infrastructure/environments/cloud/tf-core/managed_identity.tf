@@ -11,7 +11,7 @@ resource "azurerm_user_assigned_identity" "mi" {
 module "rbac_assignments" {
   for_each = var.features.smoke_test_managed_identity_created ? local.rbac_map : {}
 
-  source = "../../../dtos-devops-templates/infrastructure/modules/rbac-assignment"
+  source = "../../../../../dtos-devops-templates/infrastructure/modules/rbac-assignment"
 
   principal_id         = azurerm_user_assigned_identity.mi[each.value.region].principal_id
   role_definition_name = each.value.rbac_role
