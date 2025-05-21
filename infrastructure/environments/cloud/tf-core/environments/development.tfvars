@@ -170,9 +170,10 @@ function_apps = {
   fa_config = {
 
     serviceLayer = {
-      name_suffix            = "service-layer"
-      function_endpoint_name = "service-layer"
-      app_service_plan_key   = "DefaultServicePlan"
+      name_suffix                 = "service-layer"
+      function_endpoint_name      = "service-layer"
+      app_service_plan_key        = "DefaultServicePlan"
+      service_bus_topic_producers = ["dtoss-nsp"]
       env_vars_static = {
         QUEUE_NAME               = "queue.1"
         FUNCTIONS_WORKER_RUNTIME = "python"

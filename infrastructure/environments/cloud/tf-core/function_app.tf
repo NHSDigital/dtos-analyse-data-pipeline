@@ -71,6 +71,44 @@ module "functionapp" {
   tags = var.tags
 }
 
+locals {
+  # Filter fa_config to only include those with service_bus_topic_producers
+  service_bus_function_app_map = {
+    for app_key, app_value in var.function_apps.fa_config :
+    app_key => app_value
+    if contains(keys(app_value), "service_bus_topic_producers")
+  }
+
+  # There are multiple maps
+  # We cannot nest for loops inside a map, so first iterate all permutations as a list of objects...
+  unified_service_bus_object_list = flatten([
+    for event_key, event_value in local.service_bus_map : [
+      for function_key, function_values in local.service_bus_function_app_map : merge({
+        event_key    = event_key    # 1st iterator
+        function_key = function_key # 2nd iterator
+        event_value  = event_value
+      }, function_values) # the block of key/value pairs for a specific collection
+      if contains(keys(function_values), "service_bus_topic_producers")
+      && (function_values.service_bus_topic_producers != null ? length(function_values.service_bus_topic_producers) > 0 : false)
+    ]
+  ])
+  # ...then project them into a map with unique keys (combining the iterators), for consumption by a for_each meta argument
+  unified_service_bus_object_map = {
+    for item in local.unified_service_bus_object_list :
+    "${item.event_key}-${item.function_key}" => item
+  }
+}
+
+# Use the merged map in your resources
+resource "azurerm_role_assignment" "function_send_to_topic" {
+  for_each = local.unified_service_bus_object_map
+
+  principal_id         = module.functionapp["${each.value.function_key}-${each.value.event_value.region}"].function_app_sami_id
+  role_definition_name = "Azure Service Bus Data Sender"
+  # scope                = data.terraform_remote_state.hub.outputs.service_bus_topic["${each.value.event_key}"].id
+  scope                = module.service_bus["${each.value.event_key}"].id
+}
+
 
 /* --------------------------------------------------------------------------------------------------
   Local variables used to create the Environment Variables for the Function Apps
