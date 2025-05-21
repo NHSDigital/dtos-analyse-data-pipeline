@@ -21,9 +21,9 @@ variables:
   - group: DEV_audit_backend
   - group: DEV_hub_backend_remote_state
   - name: TF_DIRECTORY
-    value: $(System.DefaultWorkingDirectory)/$(System.TeamProject)/infrastructure/tf-audit
+    value: $(System.DefaultWorkingDirectory)/$(System.TeamProject)/infrastructure/environments/cloud/tf-audit
   - name: TF_VERSION
-    value: 1.9.2
+    value: 1.11.4
   - name: TF_PLAN_ARTIFACT
     value: tf_plan_audit_DEV
   - name: ENVIRONMENT
