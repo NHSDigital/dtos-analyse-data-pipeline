@@ -82,7 +82,7 @@ locals {
   # There are multiple maps
   # We cannot nest for loops inside a map, so first iterate all permutations as a list of objects...
   unified_service_bus_object_list = flatten([
-    for event_key, event_value in local.service_bus_map : [
+    for event_key, event_value in local.azure_service_bus_map : [
       for function_key, function_values in local.service_bus_function_app_map : merge({
         event_key    = event_key    # 1st iterator
         function_key = function_key # 2nd iterator
