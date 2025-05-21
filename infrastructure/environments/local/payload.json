@@ -1,14 +1,4 @@
 {
-  "people": [
-    { "name": "Kate", "age": 40 },
-    { "name": "Elizabeth", "age": 35 },
-    { "name": "Alice", "age": 50 },
-    { "name": "Sophia", "age": 32 },
-    { "name": "Emma", "age": 25 },
-    { "name": "Olivia", "age": 30 },
-    { "name": "Charlotte", "age": 28 },
-    { "name": "Amelia", "age": 45 },
-    { "name": "Mia", "age": 55 },
-    { "name": "Isabella", "age": 60 }
-  ]
+  "key1": "value1",
+  "key2": "value2"
 }
