@@ -75,6 +75,16 @@ curl-service-layer-function: # Send a POST request to the Service Layer Function
 	--data @infrastructure/environments/local/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
+curl-service-layer-function-loop: # Send the payload to the Service Layer Function 100 times
+		@echo "Sending payload to the Service Layer Function 100 times..."
+		for i in $$(seq 1 100); do \
+				curl -s -X POST http://localhost:7072/api/service_layer \
+						-H "Content-Type: application/json" \
+						--data @infrastructure/environments/local/payload.json; \
+				echo "Request $$i sent."; \
+		done
+		@echo "All 100 requests sent."
+
 run-unit-tests: # Run all unit tests with pytest
 	@echo "Running all unit tests with pytest..."
 	# pytest tests/FoundryIntegrationService/test_foundry_relay_function.py
