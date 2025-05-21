@@ -3,7 +3,7 @@ module "functionapp" {
 
   source = "../../../../../dtos-devops-templates/infrastructure/modules/function-app"
 
-  function_app_name   = "${module.regions_config[each.value.region].names.function-app}-si-${lower(each.value.name_suffix)}"
+  function_app_name   = "${module.regions_config[each.value.region].names.function-app}-ap-${lower(each.value.name_suffix)}"
   resource_group_name = azurerm_resource_group.core[each.value.region].name
   location            = each.value.region
 
