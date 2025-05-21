@@ -65,14 +65,14 @@ curl-relay-function: # Send a POST request to the Foundry Relay Function
 	@echo "Testing the Foundry Relay Function with curl..."
 	curl -X POST http://localhost:7071/api/FoundryRelayFunction \
 	-H "Content-Type: application/json" \
-	--data @src/FoundryIntegrationService/payload.json
+	--data @src/function_apps/FoundryIntegrationService/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
 curl-service-layer-function: # Send a POST request to the Service Layer Function
 	@echo "Testing the Foundry Relay Function with curl..."
-	curl -X POST http://localhost:7072/api/ServicebusRelayFunction \
+	curl -X POST http://localhost:7072/api/service_layer \
 	-H "Content-Type: application/json" \
-	--data @src/FoundryIntegrationService/payload.json
+	--data @infrastructure/environments/local/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
 run-unit-tests: # Run all unit tests with pytest

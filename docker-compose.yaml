@@ -4,7 +4,6 @@ services:
   bsselect-db:
     image: postgres:latest
     container_name: bsselect-db
-    env_file: .env
     ports:
       - 5432:5432
     volumes:
@@ -25,6 +24,11 @@ services:
       retries: 5
       start_period: 5s
       timeout: 5s
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
     networks:
       sb-emulator:
         aliases:
@@ -35,7 +39,12 @@ services:
       context: ./infrastructure/environments/local/bsselect-event-poster
       dockerfile: Dockerfile
     container_name: bsselect-event-poster
-    env_file: .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - NSP_SERVICE_LAYER_URL=${NSP_SERVICE_LAYER_URL}
     depends_on:
       - bsselect-db
     networks:
@@ -43,11 +52,11 @@ services:
         aliases:
           - "bsselect-event-poster"
 
-  servicebus-relay-function:
-    container_name: servicebus-relay-function
+  service-layer:
+    container_name: service-layer
     restart: always
     build:
-      context: ./src/ServiceBusIntegrationService
+      context: ./src/function_apps/service_layer
       dockerfile: Dockerfile
     networks:
       - app-network
@@ -65,7 +74,7 @@ services:
     container_name: "servicebus-emulator"
     image: mcr.microsoft.com/azure-messaging/servicebus-emulator:latest
     volumes:
-      - "${CONFIG_PATH}:/ServiceBus_Emulator/ConfigFiles/Config.json"
+      - "./infrastructure/environments/local/service-bus/config.yaml:/ServiceBus_Emulator/ConfigFiles/Config.json"
     ports:
       - "5672:5672"
       - "5300:5300"
@@ -89,14 +98,18 @@ services:
       sb-emulator:
         aliases:
           - "sqledge"
+      app-network:
+        aliases:
+          - "app-network"
     environment:
       ACCEPT_EULA: ${ACCEPT_EULA}
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
-  foundry-relay-function:
+  foundry-relay:
+    # container_name: foundry-relay
     restart: always
     build:
-      context: ./src/FoundryIntegrationService
+      context: ./src/function_apps/foundry_relay
       dockerfile: Dockerfile
     depends_on:
       - emulator

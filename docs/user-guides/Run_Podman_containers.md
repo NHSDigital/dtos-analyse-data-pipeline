@@ -67,7 +67,7 @@ You can start containers manually with Podman Compose commands.
 - **Stop a Specific Container**:
 
   ```bash
-  podman compose down foundry-relay-function
+  podman compose down foundry-relay
   ```
 
 ## Rebuilding Containers
@@ -77,7 +77,7 @@ If you make changes to the code, rebuild the container image:
 - **Rebuild a Specific Service**:
 
   ```bash
-  podman compose build foundry-relay-function
+  podman compose build foundry-relay
   ```
 
 ## Restarting Containers
