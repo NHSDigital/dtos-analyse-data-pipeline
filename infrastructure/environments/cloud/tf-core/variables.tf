@@ -193,7 +193,7 @@ variable "function_apps" {
           container_name = string
       })), [])
       db_connection_string       = optional(string, "")
-      event_grid_topic_producers = optional(list(string), [])
+      service_bus_topic_producers = optional(list(string), [])
       key_vault_url              = optional(string, "")
       app_urls = optional(list(object({
         env_var_name     = string
@@ -278,6 +278,28 @@ variable "network_security_group_rules" {
     },
 */
 
+variable "service_bus" {
+  description = "Configuration for Service Bus namespaces and their topics"
+  type = map(object({
+    namespace_name   = optional(string)
+    capacity         = number
+    sku_tier         = string
+    max_payload_size = string
+    topics = map(object({
+      auto_delete_on_idle                     = optional(string, "P10675199DT2H48M5.4775807S")
+      batched_operations_enabled              = optional(bool, false)
+      default_message_ttl                     = optional(string, "P10675199DT2H48M5.4775807S")
+      duplicate_detection_history_time_window = optional(string)
+      partitioning_enabled                    = optional(bool, false)
+      max_message_size_in_kilobytes           = optional(number, 1024)
+      max_size_in_megabytes                   = optional(number, 5120)
+      requires_duplicate_detection            = optional(bool, false)
+      support_ordering                        = optional(bool)
+      status                                  = optional(string, "Active")
+      topic_name                              = optional(string)
+    }))
+  }))
+}
 
 variable "routes" {
   description = "Routes configuration for different regions"
