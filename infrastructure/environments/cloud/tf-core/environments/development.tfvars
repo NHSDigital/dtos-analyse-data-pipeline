@@ -180,8 +180,8 @@ function_apps = {
       }
       env_vars_from_key_vault = [
         {
-          env_var_name          = "SERVICE_BUS_CONNECTION_STR_CONTAINER_VERSION"
-          key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR-CONTAINER-VERSION"
+          env_var_name          = "SERVICE_BUS_CONNECTION_STR"
+          key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
         }
       ]
     }
