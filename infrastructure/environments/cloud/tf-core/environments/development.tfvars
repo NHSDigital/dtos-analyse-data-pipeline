@@ -246,3 +246,14 @@ storage_accounts = {
     }
   }
 }
+
+service_bus = {
+  dtoss-nsp = {
+    capacity         = 1
+    sku_tier         = "Premium"
+    max_payload_size = "100mb"
+    topics = {
+      events  = {}
+    }
+  }
+}
