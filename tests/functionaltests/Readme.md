@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 1. Copy `.env.template` to `.env` in the project root and fill in the required values, e.g.:
 
-    ```
+    ```env
     AZURITE_CONNECTION_STRING=your-azurite-connection-string
     ```
 
@@ -52,6 +52,7 @@ pytest -s tests/functionaltests
 ## Generating Reports
 
 - **HTML Report** (requires `pytest-html`):
+
   ```sh
   pip install pytest-html
   pytest --html=report.html
@@ -59,7 +60,7 @@ pytest -s tests/functionaltests
 
 ## Directory Structure
 
-```
+```text
 tests/
   functionaltests/
     features/
