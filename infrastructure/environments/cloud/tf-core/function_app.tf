@@ -100,14 +100,14 @@ locals {
 }
 
 # Use the merged map in your resources
-resource "azurerm_role_assignment" "function_send_to_topic" {
-  for_each = local.unified_service_bus_object_map
+# resource "azurerm_role_assignment" "function_send_to_topic" {
+#   for_each = local.unified_service_bus_object_map
 
-  principal_id         = module.functionapp["${each.value.function_key}-${each.value.event_value.region}"].function_app_sami_id
-  role_definition_name = "Azure Service Bus Data Sender"
-  # scope                = data.terraform_remote_state.hub.outputs.service_bus_topic["${each.value.event_key}"].id
-  scope                = module.azure_service_bus[each.value.event_key].servicebus_topic_ids[each.value.event_key]
-}
+#   principal_id         = module.functionapp["${each.value.function_key}-${each.value.event_value.region}"].function_app_sami_id
+#   role_definition_name = "Azure Service Bus Data Sender"
+#   # scope                = data.terraform_remote_state.hub.outputs.service_bus_topic["${each.value.event_key}"].id
+#   scope                = module.azure_service_bus[each.value.event_key].servicebus_topic_ids[each.value.event_key]
+# }
 
 
 /* --------------------------------------------------------------------------------------------------
