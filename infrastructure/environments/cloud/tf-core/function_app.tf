@@ -107,7 +107,7 @@ resource "azurerm_role_assignment" "function_send_to_topic" {
   role_definition_name = "Azure Service Bus Data Sender"
   # scope                = module.event_grid_topic["${each.value.event_key}"].id
   # scope                = data.terraform_remote_state.hub.outputs.service_bus_topic["${each.value.event_key}"].id
-  scope                = module.azure_service_bus["${each.value.event_key}"].id
+  scope                = module.azure_service_bus[each.value.event_key].id[each.value.event_key]
 }
 # "${object.service_bus_key}-${object.region}"
 
