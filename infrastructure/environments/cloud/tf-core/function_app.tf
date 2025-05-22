@@ -103,7 +103,7 @@ locals {
 resource "azurerm_role_assignment" "function_send_to_topic" {
   for_each = local.unified_service_bus_object_map
 
-  principal_id         = module.functionapp["${each.value.function_key}-${each.value.event_value.region}"].function_app_sami_id
+  principal_id         = module.functionapp["${each.value.function_key}-${each.value.service_bus_value.region}"].function_app_sami_id
   role_definition_name = "Azure Service Bus Data Sender"
   # scope                = module.event_grid_topic["${each.value.event_key}"].id
   # scope                = data.terraform_remote_state.hub.outputs.service_bus_topic["${each.value.event_key}"].id
