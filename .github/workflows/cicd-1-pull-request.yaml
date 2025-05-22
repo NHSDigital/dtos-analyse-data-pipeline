@@ -101,7 +101,7 @@ jobs:
     # needs: [metadata, commit-stage, test-stage]
     needs: [metadata]
     uses: NHSDigital/dtos-devops-templates/.github/workflows/stage-3-build-images.yaml@feat/DTOSS-9003-Deploy-service-bus-into-the-hub-vnet
-    if: needs.metadata.outputs.does_pull_request_exist == 'true' || github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened'))
+    # if: needs.metadata.outputs.does_pull_request_exist == 'true' || github.ref == 'refs/heads/main' || (github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened'))
     with:
       docker_compose_file: ./docker-compose.yaml
       excluded_containers_csv_list: azurite,azurite-setup,sql-edge,db-setup
