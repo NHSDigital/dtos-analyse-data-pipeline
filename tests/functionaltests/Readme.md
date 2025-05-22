@@ -8,7 +8,7 @@ This project uses [pytest-bdd](https://pytest-bdd.readthedocs.io/) for behavior-
 - [pip](https://pip.pypa.io/en/stable/)
 - [pytest](https://docs.pytest.org/en/stable/)
 - [pytest-bdd](https://pytest-bdd.readthedocs.io/)
-- [python-dotenv](https://pypi.org/project/python-dotenv/)
+- [Python-dotenv](https://pypi.org/project/python-dotenv/)
 - [requests](https://pypi.org/project/requests/)
 - [azure-storage-blob](https://pypi.org/project/azure-storage-blob/)
 
@@ -53,11 +53,6 @@ pytest -s tests/functionaltests
   ```sh
   pip install pytest-html
   pytest --html=report.html
-  ```
-
-- **JUnit XML Report** (for CI/CD):
-  ```sh
-  pytest --junitxml=report.xml
   ```
 
 ## Directory Structure
