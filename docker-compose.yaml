@@ -132,7 +132,7 @@ services:
       - QUEUE_NAME=${QUEUE_NAME}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
     deploy:
-      replicas: 3
+      replicas: 2
 
   azurite:
     container_name: azurite
