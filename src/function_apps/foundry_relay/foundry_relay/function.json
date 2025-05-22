@@ -7,7 +7,7 @@
       "queueName": "%QUEUE_NAME%",
       "connection": "SERVICE_BUS_CONNECTION_STR",
       "cardinality": "many",
-      "maxMessageCount": 10
+      "maxMessageCount": "%BATCH_SIZE%"
     }
   ]
 }
