@@ -21,12 +21,14 @@ pip install -r requirements.txt
 ## Environment Setup
 
 1. Copy `.env.template` to `.env` in the project root and fill in the required values, e.g.:
+
     ```
     AZURITE_CONNECTION_STRING=your-azurite-connection-string
     ```
 
 2. Ensure any required services (e.g., Azurite, API, etc.) are running.
    You can use Podman or Docker Compose:
+
    ```sh
    podman compose -f docker-compose.yaml up -d
    # or
