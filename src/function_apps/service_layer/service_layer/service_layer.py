@@ -25,18 +25,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                 "Invalid JSON payload.", status_code=HTTPStatus.BAD_REQUEST
             )
 
+        if not isinstance(payload, dict):
+            return func.HttpResponse(
+                "Invalid payload format. Expected a JSON object.",
+                status_code=HTTPStatus.BAD_REQUEST,
+            )
+
         # Validate environment variables
         connection_str = os.getenv("SERVICE_BUS_CONNECTION_STR")
         queue_name = os.getenv("QUEUE_NAME")
 
         if not connection_str:
             raise EnvironmentError("Azure Service Bus connection string is missing.")
-
-        if not isinstance(payload, dict):
-            return func.HttpResponse(
-                "Invalid payload format. Expected a JSON object.",
-                status_code=HTTPStatus.BAD_REQUEST,
-            )
+        if not queue_name:
+            raise EnvironmentError("Service Bus queue name is missing.")
 
         try:
             client = ServiceBusClient.from_connection_string(connection_str)
@@ -55,17 +57,25 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
                         )
 
                     except ServiceBusError as e:
-                        print(f"ServiceBusError occurred while produce a message: {e}")
+                        logger.error(f"Failed to send message: {e}")
+                        return func.HttpResponse(
+                            f"Failed to send message to Service Bus: {e}",
+                            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+                        )
 
         except ServiceBusError as e:
-            print(f"ServiceBusError occurred when connecting to Service Bus: {e}")
+            logger.error(f"ServiceBus connection error: {e}")
+            return func.HttpResponse(
+                f"Failed to connect to Service Bus: {e}",
+                status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+            )
 
     # Handle exceptions
     except EnvironmentError as env_err:
-        logger.error(f"Environment variables configuration error: {env_err}")
+        logger.error(f"Configuration error: {env_err}")
         return func.HttpResponse(str(env_err), status_code=HTTPStatus.BAD_REQUEST)
     except Exception as e:
-        logger.error(f"An error occurred: {e}", exc_info=True)
+        logger.error(f"Unhandled error: {e}", exc_info=True)
         return func.HttpResponse(
             "An internal server error occurred.",
             status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
