@@ -82,11 +82,11 @@ locals {
   # There are multiple maps
   # We cannot nest for loops inside a map, so first iterate all permutations as a list of objects...
   unified_service_bus_object_list = flatten([
-    for event_key, event_value in local.azure_service_bus_map : [
+    for service_bus_key, service_bus_value in local.azure_service_bus_map : [
       for function_key, function_values in local.service_bus_function_app_map : merge({
-        event_key    = event_key    # 1st iterator
-        function_key = function_key # 2nd iterator
-        event_value  = event_value
+        service_bus_key   = service_bus_key    # 1st iterator
+        function_key      = function_key # 2nd iterator
+        service_bus_value = event_value
       }, function_values) # the block of key/value pairs for a specific collection
       if contains(keys(function_values), "service_bus_topic_producers")
       && (function_values.service_bus_topic_producers != null ? length(function_values.service_bus_topic_producers) > 0 : false)
@@ -95,7 +95,7 @@ locals {
   # ...then project them into a map with unique keys (combining the iterators), for consumption by a for_each meta argument
   unified_service_bus_object_map = {
     for item in local.unified_service_bus_object_list :
-    "${item.event_key}-${item.function_key}" => item
+    "${item.service_bus_key}-${item.function_key}" => item
   }
 }
 
@@ -107,7 +107,9 @@ resource "azurerm_role_assignment" "function_send_to_topic" {
   role_definition_name = "Azure Service Bus Data Sender"
   # scope                = module.event_grid_topic["${each.value.event_key}"].id
   # scope                = data.terraform_remote_state.hub.outputs.service_bus_topic["${each.value.event_key}"].id
-  scope                = module.azure_service_bus[each.value.event_key].id[each.value.event_key]
+  # scope                = module.azure_service_bus[each.value.service_bus_key].id[each.value.service_bus_key]
+  scope                = module.azure_service_bus[each.value.service_bus_key].namespace_id
+
 }
 # "${object.service_bus_key}-${object.region}"
 
