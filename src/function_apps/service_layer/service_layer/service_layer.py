@@ -33,7 +33,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Validate environment variables
         connection_str = os.getenv("SERVICE_BUS_CONNECTION_STR")
-        queue_name = os.getenv("QUEUE_NAME")
+        topic_name = os.getenv("TOPIC_NAME")
 
         if not connection_str:
             raise EnvironmentError("Azure Service Bus connection string is missing.")
@@ -43,7 +43,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         try:
             client = ServiceBusClient.from_connection_string(connection_str)
             with client:
-                sender = client.get_queue_sender(queue_name=queue_name)
+                sender = client.get_topic_sender(topic_name=topic_name)
                 with sender:
                     try:
                         json_message = json.dumps(payload)
