@@ -131,7 +131,7 @@ services:
       - TOPIC_NAME=${TOPIC_NAME}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
     deploy:
-      replicas: 3
+      replicas: 1
 
   azurite:
     container_name: azurite
