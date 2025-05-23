@@ -75,6 +75,23 @@ curl-service-layer-function: # Send a POST request to the Service Layer Function
 	--data @infrastructure/environments/local/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
+curl-service-layer-function-loop: # Send the payload to the Service Layer Function 100 times
+		@echo "Sending payload to the Service Layer Function multiple times in parallel..."
+		seq 100 | xargs -P 10 -I{} curl -s -X POST http://localhost:7072/api/service_layer \
+				-H "Content-Type: application/json" \
+				--data @infrastructure/environments/local/payload.json
+		@echo "All 100 requests sent."
+
+scale-foundry-relay-up: # Scale foundry-relay service up to 2 replicas
+		@echo "Scaling foundry-relay service up to 2 replicas..."
+		docker compose up --scale foundry-relay=2 -d
+		@echo "foundry-relay scaled up to 2."
+
+scale-foundry-relay-down: # Scale foundry-relay service down to 0 replicas
+		@echo "Scaling foundry-relay service down to 0 replicas..."
+		docker compose up --scale foundry-relay=0 -d
+		@echo "foundry-relay scaled down to 0."
+
 run-unit-tests: # Run all unit tests with pytest
 	@echo "Running all unit tests with pytest..."
 	# pytest tests/FoundryIntegrationService/test_foundry_relay_function.py
