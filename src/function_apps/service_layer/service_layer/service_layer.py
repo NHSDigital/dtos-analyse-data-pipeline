@@ -37,8 +37,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
         if not connection_str:
             raise EnvironmentError("Azure Service Bus connection string is missing.")
-        if not queue_name:
-            raise EnvironmentError("Service Bus queue name is missing.")
+        if not topic_name:
+            raise EnvironmentError("Service Bus topic name is missing.")
 
         try:
             client = ServiceBusClient.from_connection_string(connection_str)
