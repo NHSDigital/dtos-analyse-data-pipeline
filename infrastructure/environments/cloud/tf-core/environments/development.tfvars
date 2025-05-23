@@ -178,6 +178,7 @@ function_apps = {
         TOPIC_NAME                 = "events"
         FUNCTIONS_WORKER_RUNTIME   = "python"
         SERVICE_BUS_CONNECTION_STR = "todo"
+        USE_MANAGED_IDENTITY       = true
         # ASPNETCORE_URLS          = "http://0.0.0.0:7072"
         # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
       }
