@@ -175,17 +175,19 @@ function_apps = {
       app_service_plan_key        = "DefaultServicePlan"
       service_bus_topic_producers = ["dtoss-nsp"]
       env_vars_static = {
-        QUEUE_NAME               = "queue.1"
-        FUNCTIONS_WORKER_RUNTIME = "python"
-        ASPNETCORE_URLS          = "http://0.0.0.0:7072"
+        TOPIC_NAME                 = "events"
+        FUNCTIONS_WORKER_RUNTIME   = "python"
+        SERVICE_BUS_CONNECTION_STR = "todo"
+        USE_MANAGED_IDENTITY       = true
+        # ASPNETCORE_URLS          = "http://0.0.0.0:7072"
         # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
       }
-      env_vars_from_key_vault = [
-        {
-          env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-          key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-        }
-      ]
+      # env_vars_from_key_vault = [
+      #   {
+      #     env_var_name          = "SERVICE_BUS_CONNECTION_STR"
+      #     key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
+      #   }
+      # ]
     }
 
     foundryRelay = {
@@ -193,28 +195,30 @@ function_apps = {
       function_endpoint_name = "foundry-relay"
       app_service_plan_key   = "DefaultServicePlan"
       env_vars_static = {
-        QUEUE_NAME               = "queue.1"
-        FUNCTIONS_WORKER_RUNTIME = "python"
-        ASPNETCORE_URLS          = "http://0.0.0.0:7071"
-        FOUNDRY_API_URL          = "https://developersandbox.federateddataplatform.nhs.uk"
-        SKIP_FOUNDRY_UPLOAD      = false
+        TOPIC_NAME                 = "events"
+        FUNCTIONS_WORKER_RUNTIME   = "python"
+        # ASPNETCORE_URLS          = "http://0.0.0.0:7071"
+        FOUNDRY_API_URL            = "https://developersandbox.federateddataplatform.nhs.uk"
+        SKIP_FOUNDRY_UPLOAD        = false
         # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
-
+        FOUNDRY_API_TOKEN          = "todo"
+        FOUNDRY_PARENT_FOLDER_RID  = "todo"
+        SERVICE_BUS_CONNECTION_STR = "todo"
       }
-      env_vars_from_key_vault = [
-        {
-          env_var_name          = "FOUNDRY_API_TOKEN"
-          key_vault_secret_name = "FOUNDRY-API-TOKEN"
-        },
-        {
-          env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
-          key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
-        },
-        {
-          env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-          key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-        }
-      ]
+      # env_vars_from_key_vault = [
+      #   {
+      #     env_var_name          = "FOUNDRY_API_TOKEN"
+      #     key_vault_secret_name = "FOUNDRY-API-TOKEN"
+      #   },
+      #   {
+      #     env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
+      #     key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
+      #   },
+      #   {
+      #     env_var_name          = "SERVICE_BUS_CONNECTION_STR"
+      #     key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
+      #   }
+      # ]
     }
   }
 }

@@ -4,7 +4,7 @@
       "type": "serviceBusTrigger",
       "direction": "in",
       "name": "serviceBusMessages",
-      "queueName": "%QUEUE_NAME%",
+      "topicName": "%TOPIC_NAME%",
       "connection": "SERVICE_BUS_CONNECTION_STR",
       "cardinality": "many",
       "maxMessageCount": "%BATCH_SIZE%"
