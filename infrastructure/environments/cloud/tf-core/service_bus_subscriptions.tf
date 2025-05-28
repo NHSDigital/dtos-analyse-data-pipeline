@@ -6,7 +6,7 @@ module "service_bus_subscription" {
   subscription_name         = each.value.service_bus_subscription_key
   resource_group_name       = azurerm_resource_group.core[each.value.region].name
   max_delivery_count        = 10
-  topic_id                  = module.azure_service_bus[each.value.namespace].topic_id
+  topic_id                  = values(module.azure_service_bus[each.value.namespace].topic_ids)[0]
   namespace_name            = each.value.namespace
   service_bus_namespace_id  = module.azure_service_bus[each.value.namespace].namespace_id
   function_app_principal_id = module.functionapp["${each.value.subscriber_functionName}-${each.value.region}"].function_app_sami_id
