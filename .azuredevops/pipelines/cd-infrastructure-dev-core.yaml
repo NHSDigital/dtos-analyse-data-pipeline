@@ -14,7 +14,7 @@ resources:
     - repository: dtos-devops-templates
       type: github
       name: NHSDigital/dtos-devops-templates
-      ref: feat/DTOSS-9003-Deploy-service-bus-into-the-hub-vnet
+      ref: feat/DTOSS-9226-Create-Permissions-for-Foundry-Function-App
       endpoint: NHSDigital
 
 variables:
