@@ -203,7 +203,7 @@ function_apps = {
         FOUNDRY_API_TOKEN          = "todo"
         FOUNDRY_PARENT_FOLDER_RID  = "todo"
         SERVICE_BUS_CONNECTION_STR = "todo"
-        SUBSCRIPTION_NAME          = "testing123"
+        SUBSCRIPTION_NAME          = "event-dev-ap"
       }
       env_vars_from_key_vault = [
         {
