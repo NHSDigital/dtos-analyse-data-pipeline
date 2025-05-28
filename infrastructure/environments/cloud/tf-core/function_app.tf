@@ -84,8 +84,8 @@ locals {
   unified_service_bus_object_list = flatten([
     for service_bus_key, service_bus_value in local.azure_service_bus_map : [
       for function_key, function_values in local.service_bus_function_app_map : merge({
-        service_bus_key   = service_bus_key    # 1st iterator
-        function_key      = function_key # 2nd iterator
+        service_bus_key   = service_bus_key # 1st iterator
+        function_key      = function_key    # 2nd iterator
         service_bus_value = service_bus_value
       }, function_values) # the block of key/value pairs for a specific collection
       if contains(keys(function_values), "service_bus_topic_producers")

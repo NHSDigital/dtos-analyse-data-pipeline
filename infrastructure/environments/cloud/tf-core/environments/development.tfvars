@@ -195,10 +195,10 @@ function_apps = {
       function_endpoint_name = "foundry-relay"
       app_service_plan_key   = "DefaultServicePlan"
       env_vars_static = {
-        TOPIC_NAME                 = "events"
-        FUNCTIONS_WORKER_RUNTIME   = "python"
-        FOUNDRY_API_URL            = "https://developersandbox.federateddataplatform.nhs.uk"
-        SKIP_FOUNDRY_UPLOAD        = false
+        TOPIC_NAME               = "events"
+        FUNCTIONS_WORKER_RUNTIME = "python"
+        FOUNDRY_API_URL          = "https://developersandbox.federateddataplatform.nhs.uk"
+        SKIP_FOUNDRY_UPLOAD      = false
         # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
         FOUNDRY_API_TOKEN          = "todo"
         FOUNDRY_PARENT_FOLDER_RID  = "todo"
@@ -230,6 +230,7 @@ service_bus_subscriptions = {
     event-dev-ap = {
       subscription_name       = "events-sub"
       topic_name              = "events"
+      namespace_name          = "dtoss-nsp-uksouth"
       subscriber_functionName = "foundryRelay"
     }
   }
@@ -268,7 +269,7 @@ service_bus = {
     sku_tier         = "Premium"
     max_payload_size = "100mb"
     topics = {
-      events  = {}
+      events = {}
     }
   }
 }
