@@ -192,9 +192,10 @@ variable "function_apps" {
           env_var_name   = string
           container_name = string
       })), [])
-      db_connection_string       = optional(string, "")
+      db_connection_string        = optional(string, "")
       service_bus_topic_producers = optional(list(string), [])
-      key_vault_url              = optional(string, "")
+      key_vault_url               = optional(string, "")
+      service_bus_namespace       = optional(string, "")
       app_urls = optional(list(object({
         env_var_name     = string
         function_app_key = string
@@ -381,4 +382,16 @@ variable "function_app_slots" {
     function_app_slots_name   = optional(string, "staging")
     function_app_slot_enabled = optional(bool, false)
   }))
+}
+
+variable "service_bus_subscriptions" {
+  description = "Configuration for event grid subscriptions"
+  type = object({
+    subscriber_config = map(object({
+      subscription_name       = string
+      namespace_name          = optional(string)
+      topic_name              = string
+      subscriber_functionName = string
+    }))
+  })
 }

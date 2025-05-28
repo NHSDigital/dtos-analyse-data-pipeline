@@ -175,19 +175,10 @@ function_apps = {
       app_service_plan_key        = "DefaultServicePlan"
       service_bus_topic_producers = ["dtoss-nsp"]
       env_vars_static = {
-        TOPIC_NAME                 = "events"
-        FUNCTIONS_WORKER_RUNTIME   = "python"
-        SERVICE_BUS_CONNECTION_STR = "todo"
-        USE_MANAGED_IDENTITY       = true
-        # ASPNETCORE_URLS          = "http://0.0.0.0:7072"
-        # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
+        TOPIC_NAME               = "events"
+        FUNCTIONS_WORKER_RUNTIME = "python"
+        USE_MANAGED_IDENTITY     = true
       }
-      # env_vars_from_key_vault = [
-      #   {
-      #     env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-      #     key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-      #   }
-      # ]
     }
 
     foundryRelay = {
@@ -195,35 +186,42 @@ function_apps = {
       function_endpoint_name = "foundry-relay"
       app_service_plan_key   = "DefaultServicePlan"
       env_vars_static = {
-        TOPIC_NAME                 = "events"
-        FUNCTIONS_WORKER_RUNTIME   = "python"
-        # ASPNETCORE_URLS          = "http://0.0.0.0:7071"
-        FOUNDRY_API_URL            = "https://developersandbox.federateddataplatform.nhs.uk"
-        SKIP_FOUNDRY_UPLOAD        = false
-        # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
-        FOUNDRY_API_TOKEN          = "todo"
-        FOUNDRY_PARENT_FOLDER_RID  = "todo"
-        SERVICE_BUS_CONNECTION_STR = "todo"
+        TOPIC_NAME                        = "events"
+        FUNCTIONS_WORKER_RUNTIME          = "python"
+        FOUNDRY_API_URL                   = "https://developersandbox.federateddataplatform.nhs.uk"
+        SKIP_FOUNDRY_UPLOAD               = false
+        SUBSCRIPTION_NAME                 = "event-dev-ap"
+        USE_MANAGED_IDENTITY              = true
+        ENVIRONMENT                       = "cloud"
+        FOUNDRY_RELAY_N_RECORDS_PER_BATCH = 10
+
       }
-      # env_vars_from_key_vault = [
-      #   {
-      #     env_var_name          = "FOUNDRY_API_TOKEN"
-      #     key_vault_secret_name = "FOUNDRY-API-TOKEN"
-      #   },
-      #   {
-      #     env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
-      #     key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
-      #   },
-      #   {
-      #     env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-      #     key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-      #   }
-      # ]
+      env_vars_from_key_vault = [
+        {
+          env_var_name          = "FOUNDRY_API_TOKEN"
+          key_vault_secret_name = "FOUNDRY-API-TOKEN"
+        },
+        {
+          env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
+          key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
+        }
+      ]
     }
   }
 }
 
 function_app_slots = []
+
+service_bus_subscriptions = {
+  subscriber_config = {
+    event-dev-ap = {
+      subscription_name       = "events-sub"
+      topic_name              = "events"
+      namespace_name          = "dtoss-nsp"
+      subscriber_functionName = "foundryRelay"
+    }
+  }
+}
 
 key_vault = {
   disk_encryption   = true
@@ -258,7 +256,7 @@ service_bus = {
     sku_tier         = "Premium"
     max_payload_size = "100mb"
     topics = {
-      events  = {}
+      events = {}
     }
   }
 }

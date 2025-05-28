@@ -131,6 +131,7 @@ services:
       - ASPNETCORE_URLS=http://0.0.0.0:7071
       - TOPIC_NAME=${TOPIC_NAME}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
+      - SUBSCRIPTION_NAME=${SUBSCRIPTION_NAME}
     deploy:
       replicas: 2
 

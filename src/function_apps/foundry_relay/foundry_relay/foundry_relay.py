@@ -7,13 +7,14 @@ from typing import List
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
+from azure.servicebus import ServiceBusClient
+from azure.identity import DefaultAzureCredential
+from typing import List
 
 logger = logging.getLogger(__name__)
 
-
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
-
     batch_payloads = []
     for serviceBusMessage in serviceBusMessages:
         try:
