@@ -230,7 +230,7 @@ service_bus_subscriptions = {
     event-dev-ap = {
       subscription_name       = "events-sub"
       topic_name              = "events"
-      namespace_name          = "dtoss-nsp-uksouth"
+      namespace_name          = "dtoss-nsp"
       subscriber_functionName = "foundryRelay"
     }
   }

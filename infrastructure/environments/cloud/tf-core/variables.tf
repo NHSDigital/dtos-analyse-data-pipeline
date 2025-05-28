@@ -388,6 +388,7 @@ variable "service_bus_subscriptions" {
   type = object({
     subscriber_config = map(object({
       subscription_name       = string
+      namespace_name          = optional(string)
       topic_name              = string
       subscriber_functionName = string
     }))
