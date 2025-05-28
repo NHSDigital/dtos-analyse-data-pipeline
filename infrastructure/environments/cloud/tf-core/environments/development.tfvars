@@ -199,11 +199,7 @@ function_apps = {
         FUNCTIONS_WORKER_RUNTIME = "python"
         FOUNDRY_API_URL          = "https://developersandbox.federateddataplatform.nhs.uk"
         SKIP_FOUNDRY_UPLOAD      = false
-        # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
-        FOUNDRY_API_TOKEN          = "todo"
-        FOUNDRY_PARENT_FOLDER_RID  = "todo"
-        SERVICE_BUS_CONNECTION_STR = "todo"
-        SUBSCRIPTION_NAME          = "event-dev-ap"
+        SUBSCRIPTION_NAME        = "event-dev-ap"
       }
       env_vars_from_key_vault = [
         {
@@ -214,10 +210,6 @@ function_apps = {
           env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
           key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
         }
-        # {
-        #   env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-        #   key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-        # }
       ]
     }
   }
