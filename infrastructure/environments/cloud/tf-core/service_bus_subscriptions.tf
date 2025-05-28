@@ -7,7 +7,7 @@ module "service_bus_subscription" {
   max_delivery_count        = 10
   topic_id                  = values(module.azure_service_bus["${each.value.namespace_name}-${each.value.region}"].topic_ids)[0]
   namespace_name            = "${each.value.namespace_name}-${each.value.region}"
-  service_bus_namespace_id  = module.azure_service_bus[each.value.namespace].namespace_id
+  service_bus_namespace_id  = module.azure_service_bus["${each.value.namespace_name}-${each.value.region}"].namespace_id
   function_app_principal_id = module.functionapp["${each.value.subscriber_functionName}-${each.value.region}"].function_app_sami_id
 
 }
