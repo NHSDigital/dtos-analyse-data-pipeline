@@ -197,33 +197,43 @@ function_apps = {
       env_vars_static = {
         TOPIC_NAME                 = "events"
         FUNCTIONS_WORKER_RUNTIME   = "python"
-        # ASPNETCORE_URLS          = "http://0.0.0.0:7071"
         FOUNDRY_API_URL            = "https://developersandbox.federateddataplatform.nhs.uk"
         SKIP_FOUNDRY_UPLOAD        = false
         # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
         FOUNDRY_API_TOKEN          = "todo"
         FOUNDRY_PARENT_FOLDER_RID  = "todo"
         SERVICE_BUS_CONNECTION_STR = "todo"
+        SUBSCRIPTION_NAME          = "testing123"
       }
-      # env_vars_from_key_vault = [
-      #   {
-      #     env_var_name          = "FOUNDRY_API_TOKEN"
-      #     key_vault_secret_name = "FOUNDRY-API-TOKEN"
-      #   },
-      #   {
-      #     env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
-      #     key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
-      #   },
-      #   {
-      #     env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-      #     key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-      #   }
-      # ]
+      env_vars_from_key_vault = [
+        {
+          env_var_name          = "FOUNDRY_API_TOKEN"
+          key_vault_secret_name = "FOUNDRY-API-TOKEN"
+        },
+        {
+          env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
+          key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
+        }
+        # {
+        #   env_var_name          = "SERVICE_BUS_CONNECTION_STR"
+        #   key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
+        # }
+      ]
     }
   }
 }
 
 function_app_slots = []
+
+service_bus_subscriptions = {
+  subscriber_config = {
+    event-dev-ap = {
+      subscription_name       = "events-sub"
+      topic_name              = "events"
+      subscriber_functionName = "foundryRelay"
+    }
+  }
+}
 
 key_vault = {
   disk_encryption   = true

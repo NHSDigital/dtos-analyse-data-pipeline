@@ -6,7 +6,7 @@
       "name": "serviceBusMessage",
       "topicName": "%TOPIC_NAME%",
       "connection": "SERVICE_BUS_CONNECTION_STR",
-      "subscriptionName": "testing123"
+      "subscriptionName": "SUBSCRIPTION_NAME"
     }
   ]
 }

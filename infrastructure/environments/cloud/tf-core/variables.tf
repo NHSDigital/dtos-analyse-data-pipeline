@@ -382,3 +382,14 @@ variable "function_app_slots" {
     function_app_slot_enabled = optional(bool, false)
   }))
 }
+
+variable "service_bus_subscriptions" {
+  description = "Configuration for event grid subscriptions"
+  type = object({
+    subscriber_config = map(object({
+      subscription_name       = string
+      topic_name              = string
+      subscriber_functionName = string
+    }))
+  })
+}
