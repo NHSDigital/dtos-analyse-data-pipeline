@@ -179,6 +179,7 @@ function_apps = {
         FUNCTIONS_WORKER_RUNTIME   = "python"
         SERVICE_BUS_CONNECTION_STR = "todo"
         USE_MANAGED_IDENTITY       = true
+        SERVICE_BUS_NAMESPACE      = "dtoss-nsp-uksouth.sevicebus.windows.net"
         # ASPNETCORE_URLS          = "http://0.0.0.0:7072"
         # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
       }

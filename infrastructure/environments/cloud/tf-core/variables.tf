@@ -195,6 +195,7 @@ variable "function_apps" {
       db_connection_string        = optional(string, "")
       service_bus_topic_producers = optional(list(string), [])
       key_vault_url               = optional(string, "")
+      service_bus_namespace       = optional(string, "")
       app_urls = optional(list(object({
         env_var_name     = string
         function_app_key = string

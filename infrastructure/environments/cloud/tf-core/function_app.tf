@@ -159,6 +159,11 @@ locals {
               )
             },
 
+            length(config.service_bus_namespace) > 0 ? {
+              (config.service_bus_namespace) = module.azure_service_bus[region].namespace_name
+            } : {},
+
+
             # Dynamic reference to Key Vault
             length(config.key_vault_url) > 0 ? {
               (config.key_vault_url) = module.key_vault[region].key_vault_url
