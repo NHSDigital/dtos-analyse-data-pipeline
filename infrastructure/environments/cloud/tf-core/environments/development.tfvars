@@ -177,18 +177,8 @@ function_apps = {
       env_vars_static = {
         TOPIC_NAME                 = "events"
         FUNCTIONS_WORKER_RUNTIME   = "python"
-        SERVICE_BUS_CONNECTION_STR = "todo"
         USE_MANAGED_IDENTITY       = true
-        # SERVICE_BUS_NAMESPACE      = "dtoss-nsp-uksouth.sevicebus.windows.net"
-        # ASPNETCORE_URLS          = "http://0.0.0.0:7072"
-        # AzureWebJobsStorage      = "UseDevelopmentStorage=false"
       }
-      # env_vars_from_key_vault = [
-      #   {
-      #     env_var_name          = "SERVICE_BUS_CONNECTION_STR"
-      #     key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
-      #   }
-      # ]
     }
 
     foundryRelay = {
@@ -201,6 +191,7 @@ function_apps = {
         FOUNDRY_API_URL          = "https://developersandbox.federateddataplatform.nhs.uk"
         SKIP_FOUNDRY_UPLOAD      = false
         SUBSCRIPTION_NAME        = "event-dev-ap"
+        USE_MANAGED_IDENTITY     = true
       }
       env_vars_from_key_vault = [
         {

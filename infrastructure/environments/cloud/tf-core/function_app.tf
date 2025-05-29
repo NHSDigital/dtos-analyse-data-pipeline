@@ -160,7 +160,7 @@ locals {
             },
 
             {
-              for key, obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => "${module.azure_service_bus[obj.service_bus_key].namespace_name}.sevicebus.windows.net"
+              for key, obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => "${module.azure_service_bus[obj.service_bus_key].namespace_name}.servicebus.windows.net"
             },
 
             # Dynamic reference to Key Vault
