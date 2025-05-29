@@ -160,9 +160,8 @@ locals {
             },
 
             length(config.service_bus_namespace) > 0 ? {
-              (config.service_bus_namespace) = module.azure_service_bus[region].namespace_name
+              (config.service_bus_namespace) = = "${module.azure_service_bus[region].namespace_name}.sevicebus.windows.net"
             } : {},
-
 
             # Dynamic reference to Key Vault
             length(config.key_vault_url) > 0 ? {
