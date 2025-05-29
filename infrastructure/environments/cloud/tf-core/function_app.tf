@@ -164,7 +164,7 @@ locals {
             # } : {},
 
             {
-              for obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => module.azure_service_bus[each.value.service_bus_key].namespace_name
+              for key, obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => module.azure_service_bus[obj.service_bus_key].namespace_name
             },
 
             # Dynamic reference to Key Vault
