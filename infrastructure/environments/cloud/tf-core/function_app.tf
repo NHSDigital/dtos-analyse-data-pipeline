@@ -159,12 +159,8 @@ locals {
               )
             },
 
-            # length(config.service_bus_namespace) > 0 ? {
-            #   (config.service_bus_namespace) = "${module.azure_service_bus["fdtoss-nsp-${region}"].namespace_name}.sevicebus.windows.net"
-            # } : {},
-
             {
-              for key, obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => module.azure_service_bus[obj.service_bus_key].namespace_name
+              for key, obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => "${module.azure_service_bus[obj.service_bus_key].namespace_name}.sevicebus.windows.net"
             },
 
             # Dynamic reference to Key Vault
