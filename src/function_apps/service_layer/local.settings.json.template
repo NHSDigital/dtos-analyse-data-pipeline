@@ -6,6 +6,7 @@
     "FUNCTIONS_WORKER_RUNTIME": "python",
     "AZURITE_CONNECTION_STRING": "example",
     "AZURITE_CONTAINER_NAME": "inbound",
-    "SKIP_FOUNDRY_UPLOAD": "true"
+    "ENVIRONMENT": "local",
+    "BATCH_SIZE": "10"
   }
 }
