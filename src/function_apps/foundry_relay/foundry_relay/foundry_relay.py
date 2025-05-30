@@ -31,7 +31,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             yield lst[i : i + n]
 
     # Get batch size from environment variable, default to 10 if not set
-    batch_size = int(os.getenv("BATCH_SIZE", "10"))
+    batch_size = int(os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"))
 
     for chunk in chunks(batch_payloads, batch_size):
         file_name = generate_file_name()
