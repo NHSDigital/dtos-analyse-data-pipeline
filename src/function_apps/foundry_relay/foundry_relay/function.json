@@ -3,10 +3,12 @@
     {
       "type": "serviceBusTrigger",
       "direction": "in",
-      "name": "msg",
-      "topicName": "%SERVICE_BUS_TOPIC%",
+      "name": "serviceBusMessage",
+      "topicName": "%TOPIC_NAME%",
+      "connection": "SERVICE_BUS_CONNECTION_STR",
       "subscriptionName": "event-dev-ap",
-      "connection": "%SERVICE_BUS_CONNECTION%"
+      "cardinality": "many",
+      "maxMessageCount": "%BATCH_SIZE%"
     }
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "name": "msg",
+      "topicName": "%SERVICE_BUS_TOPIC%",
+      "subscriptionName": "event-dev-ap",
+      "connection": "%SERVICE_BUS_CONNECTION%"
+    }
+  ]
+}
