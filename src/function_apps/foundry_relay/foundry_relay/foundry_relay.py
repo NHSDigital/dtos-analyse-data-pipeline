@@ -16,11 +16,11 @@ app = func.FunctionApp()
 
 logger = logging.getLogger(__name__)
 
-@app.function_name(name="foundry_relay")
+@app.function_name(name="dev-uks-ap-foundry-relay")
 @app.service_bus_topic_trigger(
     arg_name="msg",
-    topic_name=os.getenv("SERVICE_BUS_TOPIC"),
-    subscription_name=os.getenv("SERVICE_BUS_SUBSCRIPTION"),
+    topic_name=os.getenv("TOPIC_NAME"),
+    subscription_name=os.getenv("SUBSCRIPTION_NAME"),
     connection="SERVICE_BUS_NAMESPACE"  # Only the name of the app setting, no connection string needed
 )
 def main(serviceBusMessage: func.ServiceBusMessage) -> None:
