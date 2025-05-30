@@ -4,7 +4,7 @@ import os
 
 subscription_name = os.environ.get("SUBSCRIPTION_NAME", "default-subscription")
 
-file_path = "/home/site/wwwroot/<your-function-folder>/function.json"
+file_path = "/home/site/wwwroot/foundry_relay/function.json"
 
 with open(file_path, "r") as f:
     config = json.load(f)

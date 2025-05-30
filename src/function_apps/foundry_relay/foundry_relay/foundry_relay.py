@@ -8,10 +8,21 @@ from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
 from azure.servicebus import ServiceBusClient
 from azure.identity import DefaultAzureCredential
+import azure.functions as func
+import os
+
+app = func.FunctionApp()
+
 
 logger = logging.getLogger(__name__)
 
-
+@app.function_name(name="foundry_relay")
+@app.service_bus_topic_trigger(
+    arg_name="msg",
+    topic_name=os.getenv("SERVICE_BUS_TOPIC"),
+    subscription_name=os.getenv("SERVICE_BUS_SUBSCRIPTION"),
+    connection="SERVICE_BUS_NAMESPACE"  # Only the name of the app setting, no connection string needed
+)
 def main(serviceBusMessage: func.ServiceBusMessage) -> None:
     logger.info("Foundry file upload function triggered by Service Bus.")
 
