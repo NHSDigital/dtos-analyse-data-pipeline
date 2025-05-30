@@ -3,18 +3,18 @@ import logging
 import os
 from datetime import datetime
 from uuid import uuid4
-from typing import List
-
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
+from azure.servicebus import ServiceBusClient
+from azure.identity import DefaultAzureCredential
 
 logger = logging.getLogger(__name__)
 
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry file upload function triggered by Service Bus (batch).")
-
+    logger.info("Alastair 123.")
     for serviceBusMessage in serviceBusMessages:
         try:
             # 1) Parse JSON payload
