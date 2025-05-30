@@ -20,7 +20,6 @@
 #     logger.info("Foundry file upload function triggered by Timer.")
 #     logging.info(f"Received message: {msg.get_body().decode()}")
 
-
 #     try:
 #         # Connect to Service Bus using Managed Identity
 #         with create_service_bus_client() as sb_client:
