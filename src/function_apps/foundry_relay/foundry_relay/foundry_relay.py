@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.function_name(name="dev-uks-ap-foundry-relay")
-@app.schedule(schedule="*/1 * * * *", arg_name="mytimer", run_on_startup=False, use_monitor=True)
+@app.schedule(schedule="*/1 * * * *", arg_name="mytimer", run_on_startup=True, use_monitor=True)
 def main(mytimer: func.TimerRequest) -> None:
     logger.info("Foundry file upload function triggered by Timer.")
     logging.info(f"Received message: {msg.get_body().decode()}")
