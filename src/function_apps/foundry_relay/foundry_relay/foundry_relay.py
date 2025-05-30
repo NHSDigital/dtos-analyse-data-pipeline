@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 @app.schedule(schedule="*/1 * * * *", arg_name="mytimer", run_on_startup=False, use_monitor=True)
 def main(mytimer: func.TimerRequest) -> None:
     logger.info("Foundry file upload function triggered by Timer.")
+    logging.info(f"Received message: {msg.get_body().decode()}")
+
 
     try:
         # Connect to Service Bus using Managed Identity

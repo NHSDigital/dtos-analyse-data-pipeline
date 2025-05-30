@@ -1,0 +1,12 @@
+{
+  "bindings": [
+    {
+      "type": "serviceBusTrigger",
+      "direction": "in",
+      "name": "serviceBusMessage",
+      "topicName": "%TOPIC_NAME%",
+      "connection": "SERVICE_BUS_CONNECTION_STR",
+      "subscriptionName": "SUBSCRIPTION_NAME"
+    }
+  ]
+}
