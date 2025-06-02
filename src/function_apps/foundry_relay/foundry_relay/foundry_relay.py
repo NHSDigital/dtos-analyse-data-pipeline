@@ -10,6 +10,13 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
+# Environment Variable Names
+ENV_FOUNDRY_URL = "FOUNDRY_API_URL"
+ENV_FOUNDRY_TOKEN = "FOUNDRY_API_TOKEN"
+ENV_FOUNDRY_PARENT_FOLDER_RID = "FOUNDRY_PARENT_FOLDER_RID"
+ENV_AZURITE_CONNECTION_STRING = "AZURITE_CONNECTION_STRING"
+ENV_AZURITE_CONTAINER_NAME = "AZURITE_CONTAINER_NAME"
+FOUNDRY_RELAY_N_RECORDS_PER_BATCH = "FOUNDRY_RELAY_N_RECORDS_PER_BATCH"
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
@@ -31,7 +38,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             yield lst[i : i + n]
 
     # Get batch size from environment variable, default to 10 if not set
-    batch_size = int(os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"))
+    batch_size = int(os.getenv(FOUNDRY_RELAY_N_RECORDS_PER_BATCH, "10"))
 
     for chunk in chunks(batch_payloads, batch_size):
         file_name = generate_file_name()
@@ -40,9 +47,9 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
 
         # Upload to Foundry Folder
         try:
-            foundry_url = os.getenv("FOUNDRY_API_URL")
-            api_token = os.getenv("FOUNDRY_API_TOKEN")
-            parent_folder_rid = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
+            foundry_url = os.getenv(ENV_FOUNDRY_URL)
+            api_token = os.getenv(ENV_FOUNDRY_TOKEN)
+            parent_folder_rid = os.getenv(ENV_FOUNDRY_PARENT_FOLDER_RID)
             if not foundry_url or not api_token or not parent_folder_rid:
                 raise EnvironmentError("Foundry environment variables are missing.")
             client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
@@ -66,8 +73,8 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         # Upload to local Azurite Blob if local development
         if environment == "local":
             try:
-                azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
-                azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
+                azurite_connection_string = os.getenv(ENV_AZURITE_CONNECTION_STRING)
+                azurite_container_name = os.getenv(ENV_AZURITE_CONTAINER_NAME)
                 if not azurite_connection_string or not azurite_container_name:
                     raise EnvironmentError("Azurite Blob configuration is missing.")
                 blob_service_client = BlobServiceClient.from_connection_string(
