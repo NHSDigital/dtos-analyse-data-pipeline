@@ -6,7 +6,7 @@
       "name": "serviceBusMessages",
       "topicName": "%TOPIC_NAME%",
       "connection": "SERVICE_BUS_CONNECTION_STR",
-      "subscriptionName": "event-dev-ap",
+      "subscriptionName": "%SUBSCRIPTION_NAME%",
       "cardinality": "many",
       "maxMessageCount": "%BATCH_SIZE%",
       "isBatched": true
