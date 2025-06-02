@@ -14,7 +14,7 @@ resources:
     - repository: dtos-devops-templates
       type: github
       name: NHSDigital/dtos-devops-templates
-      ref: feat/DTOSS-9226-Create-Permissions-for-Foundry-Function-App
+      ref: d1334504371eee442dc9ae03b9c3854d4b5fb83b
       endpoint: NHSDigital
 
 variables:
