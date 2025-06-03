@@ -106,7 +106,7 @@ jobs:
       excluded_containers_csv_list: azurite,azurite-setup,sql-edge,db-setup
       environment_tag: ${{ needs.metadata.outputs.environment_tag }}
       function_app_source_code_path: src
-      project_name: analyse-data-pipelines
+      project_name: analyse-data-pipeline
     secrets: inherit
   acceptance-stage: # Recommended maximum execution time is 10 minutes
     name: "Acceptance stage"

@@ -4,10 +4,12 @@
       "type": "serviceBusTrigger",
       "direction": "in",
       "name": "serviceBusMessages",
-      "queueName": "%QUEUE_NAME%",
+      "topicName": "%TOPIC_NAME%",
       "connection": "SERVICE_BUS_CONNECTION_STR",
+      "subscriptionName": "%SUBSCRIPTION_NAME%",
       "cardinality": "many",
-      "maxMessageCount": "%BATCH_SIZE%"
+      "maxMessageCount": "%BATCH_SIZE%",
+      "isBatched": true
     }
   ]
 }

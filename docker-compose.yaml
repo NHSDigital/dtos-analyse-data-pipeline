@@ -67,7 +67,7 @@ services:
       - AzureWebJobsStorage=${AZURITE_CONNECTION_STRING}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
       - FUNCTIONS_WORKER_RUNTIME=python
-      - QUEUE_NAME=${QUEUE_NAME}
+      - TOPIC_NAME=${TOPIC_NAME}
       - ASPNETCORE_URLS=http://0.0.0.0:7072
 
   emulator:
@@ -106,7 +106,7 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
   foundry-relay:
-    # container_name: foundry-relay
+    container_name: foundry-relay
     restart: always
     build:
       context: ./src/function_apps/foundry_relay
@@ -129,10 +129,11 @@ services:
       - ENVIRONMENT=${ENVIRONMENT}
       - BATCH_SIZE=${BATCH_SIZE}
       - ASPNETCORE_URLS=http://0.0.0.0:7071
-      - QUEUE_NAME=${QUEUE_NAME}
+      - TOPIC_NAME=${TOPIC_NAME}
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
+      - SUBSCRIPTION_NAME=${SUBSCRIPTION_NAME}
     deploy:
-      replicas: 2
+      replicas: 1
 
   azurite:
     container_name: azurite

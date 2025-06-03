@@ -3,7 +3,7 @@ module "functionapp" {
 
   source = "../../../../../dtos-devops-templates/infrastructure/modules/function-app"
 
-  function_app_name   = "${module.regions_config[each.value.region].names.function-app}-si-${lower(each.value.name_suffix)}"
+  function_app_name   = "${module.regions_config[each.value.region].names.function-app}-ap-${lower(each.value.name_suffix)}"
   resource_group_name = azurerm_resource_group.core[each.value.region].name
   location            = each.value.region
 
@@ -71,6 +71,44 @@ module "functionapp" {
   tags = var.tags
 }
 
+locals {
+  # Filter fa_config to only include those with producer_to_service_bus
+  service_bus_function_app_map = {
+    for app_key, app_value in var.function_apps.fa_config :
+    app_key => app_value
+    if contains(keys(app_value), "producer_to_service_bus")
+  }
+
+  # There are multiple maps
+  # We cannot nest for loops inside a map, so first iterate all permutations as a list of objects...
+  unified_service_bus_object_list = flatten([
+    for service_bus_key, service_bus_value in local.azure_service_bus_map : [
+      for function_key, function_values in local.service_bus_function_app_map : merge({
+        service_bus_key   = service_bus_key # 1st iterator
+        function_key      = function_key    # 2nd iterator
+        service_bus_value = service_bus_value
+      }, function_values) # the block of key/value pairs for a specific collection
+      if contains(keys(function_values), "producer_to_service_bus")
+      && (function_values.producer_to_service_bus != null ? length(function_values.producer_to_service_bus) > 0 : false)
+    ]
+  ])
+  # ...then project them into a map with unique keys (combining the iterators), for consumption by a for_each meta argument
+  unified_service_bus_object_map = {
+    for item in local.unified_service_bus_object_list :
+    "${item.service_bus_key}-${item.function_key}" => item
+  }
+}
+
+# Use the merged map in your resources
+resource "azurerm_role_assignment" "function_send_to_topic" {
+  for_each = local.unified_service_bus_object_map
+
+  principal_id         = module.functionapp["${each.value.function_key}-${each.value.service_bus_value.region}"].function_app_sami_id
+  role_definition_name = "Azure Service Bus Data Sender"
+  scope                = module.azure_service_bus[each.value.service_bus_key].namespace_id
+
+}
+
 
 /* --------------------------------------------------------------------------------------------------
   Local variables used to create the Environment Variables for the Function Apps
@@ -121,6 +159,10 @@ locals {
               )
             },
 
+            {
+              for key, obj in local.unified_service_bus_object_map : "SERVICE_BUS_NAMESPACE" => "${module.azure_service_bus[obj.service_bus_key].namespace_name}.servicebus.windows.net"
+            },
+
             # Dynamic reference to Key Vault
             length(config.key_vault_url) > 0 ? {
               (config.key_vault_url) = module.key_vault[region].key_vault_url
@@ -147,7 +189,7 @@ locals {
           rbac_role_assignments = flatten([
 
             # Key Vault
-            var.key_vault != {} && length(config.key_vault_url) > 0 ? [
+            var.key_vault != {} && length(config.env_vars_from_key_vault) > 0 ? [
               for role in local.rbac_roles_key_vault : {
                 role_definition_name = role
                 scope                = module.key_vault[region].key_vault_id
