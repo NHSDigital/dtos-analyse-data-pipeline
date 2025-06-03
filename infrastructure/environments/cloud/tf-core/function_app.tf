@@ -72,11 +72,11 @@ module "functionapp" {
 }
 
 locals {
-  # Filter fa_config to only include those with service_bus_topic_producers
+  # Filter fa_config to only include those with producer_to_service_bus
   service_bus_function_app_map = {
     for app_key, app_value in var.function_apps.fa_config :
     app_key => app_value
-    if contains(keys(app_value), "service_bus_topic_producers")
+    if contains(keys(app_value), "producer_to_service_bus")
   }
 
   # There are multiple maps
@@ -88,8 +88,8 @@ locals {
         function_key      = function_key    # 2nd iterator
         service_bus_value = service_bus_value
       }, function_values) # the block of key/value pairs for a specific collection
-      if contains(keys(function_values), "service_bus_topic_producers")
-      && (function_values.service_bus_topic_producers != null ? length(function_values.service_bus_topic_producers) > 0 : false)
+      if contains(keys(function_values), "producer_to_service_bus")
+      && (function_values.producer_to_service_bus != null ? length(function_values.producer_to_service_bus) > 0 : false)
     ]
   ])
   # ...then project them into a map with unique keys (combining the iterators), for consumption by a for_each meta argument
@@ -195,14 +195,6 @@ locals {
                 scope                = module.key_vault[region].key_vault_id
               }
             ] : [],
-
-            # Key Vault
-            # var.key_vault != {} && length(config.key_vault_url) > 0 ? [
-            #   for role in local.rbac_roles_key_vault : {
-            #     role_definition_name = role
-            #     scope                = module.key_vault[region].key_vault_id
-            #   }
-            # ] : [],
 
             # Storage Accounts
             [

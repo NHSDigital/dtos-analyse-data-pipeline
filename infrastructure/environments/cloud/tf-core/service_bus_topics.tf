@@ -13,7 +13,8 @@ module "azure_service_bus" {
 
   # Private Endpoint Configuration if enabled
   private_endpoint_properties = var.features.private_endpoints_enabled ? {
-    # THIS MUST be changed to service bus
+    # This should be changed to service bus see https://github.com/NHSDigital/dtos-hub/blob/b9455d3a9c29f8837d75bcc3c67a111c2a49831d/infrastructure/dns_private.tf#L53
+    # and https://github.com/NHSDigital/dtos-hub/blob/b9455d3a9c29f8837d75bcc3c67a111c2a49831d/infrastructure/dns_private.tf#L49
     private_dns_zone_ids                 = [data.terraform_remote_state.hub.outputs.private_dns_zones["${each.value.region}-event_hub"].id]
     private_endpoint_enabled             = var.features.private_endpoints_enabled
     private_endpoint_subnet_id           = module.subnets["${module.regions_config[each.value.region].names.subnet}-pep"].id

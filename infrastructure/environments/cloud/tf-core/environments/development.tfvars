@@ -170,10 +170,10 @@ function_apps = {
   fa_config = {
 
     serviceLayer = {
-      name_suffix                 = "service-layer"
-      function_endpoint_name      = "service-layer"
-      app_service_plan_key        = "DefaultServicePlan"
-      service_bus_topic_producers = ["dtoss-nsp-service-layer"]
+      name_suffix             = "service-layer"
+      function_endpoint_name  = "service-layer"
+      app_service_plan_key    = "DefaultServicePlan"
+      producer_to_service_bus = ["dtoss-nsp"]
       env_vars_static = {
         TOPIC_NAME               = "events"
         FUNCTIONS_WORKER_RUNTIME = "python"
@@ -214,7 +214,7 @@ service_bus_subscriptions = {
     event-dev-ap = {
       subscription_name       = "events-sub"
       topic_name              = "events"
-      namespace_name          = "dtoss-nsp-service-layer"
+      namespace_name          = "dtoss-nsp"
       subscriber_functionName = "foundryRelay"
     }
   }
@@ -248,12 +248,14 @@ storage_accounts = {
 }
 
 service_bus = {
-  dtoss-nsp-service-layer = {
+  dtoss-nsp = {
     capacity         = 1
     sku_tier         = "Premium"
     max_payload_size = "100mb"
     topics = {
-      events = {}
+      events = {
+        batched_operations_enabled = true
+      }
     }
   }
 }
