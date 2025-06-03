@@ -28,14 +28,23 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             raise EnvironmentError("Service Bus topic name is missing.")
 
         # Create ServiceBusClient
-        logger.info("Connecting to the Service Bus via Managed Identity.")
+        if use_managed_identity:
+            logger.info("Connecting to the Service Bus via Managed Identity.")
 
-        fully_qualified_namespace = os.getenv("SERVICE_BUS_NAMESPACE")
-        if not fully_qualified_namespace:
-            raise EnvironmentError("SERVICE_BUS_NAMESPACE is required when using managed identity.")
-        logger.info("Using Managed Identity for Service Bus authentication.")
-        credential = DefaultAzureCredential()
-        client = ServiceBusClient(fully_qualified_namespace=fully_qualified_namespace, credential=credential)
+            fully_qualified_namespace = os.getenv("SERVICE_BUS_NAMESPACE")
+            if not fully_qualified_namespace:
+                raise EnvironmentError("SERVICE_BUS_NAMESPACE is required when using managed identity.")
+            logger.info("Using Managed Identity for Service Bus authentication.")
+            credential = DefaultAzureCredential()
+            client = ServiceBusClient(fully_qualified_namespace=fully_qualified_namespace, credential=credential)
+        else:
+            # Validate environment variables
+            logger.info("Connecting to the Service Bus via a connection string.")
+            connection_str = os.getenv("SERVICE_BUS_CONNECTION_STR")
+            if not connection_str:
+                raise EnvironmentError("SERVICE_BUS_CONNECTION_STR is required when not using managed identity.")
+            logger.info("Using connection string for Service Bus authentication.")
+            client = ServiceBusClient.from_connection_string(connection_str)
 
         # Send message to topic
         with client:
