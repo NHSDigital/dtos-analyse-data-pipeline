@@ -10,9 +10,28 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
+# Environment Variable Name
+ENV_VARS ={
+    "ENV_FOUNDRY_URL" : os.getenv("FOUNDRY_API_URL"),
+    "ENV_FOUNDRY_TOKEN" : os.getenv("FOUNDRY_API_TOKEN"),
+    "ENV_FOUNDRY_PARENT_FOLDER_RID": os.getenv("FOUNDRY_PARENT_FOLDER_RID"),
+    "ENV_AZURITE_CONNECTION_STRING": os.getenv("AZURITE_CONNECTION_STRING"),
+    "ENV_AZURITE_CONTAINER_NAME": os.getenv("AZURITE_CONTAINER_NAME"),
+    "FOUNDRY_RELAY_N_RECORDS_PER_BATCH": os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"),
+    "TARGET_DATAWAREHOUSE": os.getenv("TARGET_DATAWAREHOUSE", "blob"),
+}
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
+
+    if ENV_VARS["TARGET_DATAWAREHOUSE"] == "foundry":
+        foundry_url = get_env("FOUNDRY_API_URL", required=True)
+        api_token = get_env("FOUNDRY_API_TOKEN", required=True)
+        parent_folder_rid = get_env("FOUNDRY_PARENT_FOLDER_RID", required=True)
+
+    if ENV_VARS["TARGET_DATAWAREHOUSE"] == "blob":
+        azurite_container_name = get_env("AZURITE_CONTAINER_NAME", required=True)
+        azurite_connection_string = get_env("AZURITE_CONNECTION_STRING", required=True)
 
     batch_payloads = []
     for serviceBusMessage in serviceBusMessages:
@@ -31,7 +50,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             yield lst[i : i + n]
 
     # Get batch size from environment variable, default to 10 if not set
-    batch_size = int(os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"))
+    batch_size = int(os.getenv(FOUNDRY_RELAY_N_RECORDS_PER_BATCH, "10"))
 
     for chunk in chunks(batch_payloads, batch_size):
         file_name = generate_file_name()
@@ -40,9 +59,6 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
 
         # Upload to Foundry Folder
         try:
-            foundry_url = os.getenv("FOUNDRY_API_URL")
-            api_token = os.getenv("FOUNDRY_API_TOKEN")
-            parent_folder_rid = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
             if not foundry_url or not api_token or not parent_folder_rid:
                 raise EnvironmentError("Foundry environment variables are missing.")
             client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
@@ -60,14 +76,10 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         except Exception as foundry_error:
             logger.error(f"Failed to upload batch to Foundry: {foundry_error}")
 
-        # Read ENVIRONMENT variable (default to 'cloud' if not set)
-        environment = os.getenv("ENVIRONMENT", "cloud").lower()
 
         # Upload to local Azurite Blob if local development
-        if environment == "local":
+        if get_env("TARGET_DATAWAREHOUSE", default="blob") == "blob":
             try:
-                azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
-                azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
                 if not azurite_connection_string or not azurite_container_name:
                     raise EnvironmentError("Azurite Blob configuration is missing.")
                 blob_service_client = BlobServiceClient.from_connection_string(
@@ -91,3 +103,9 @@ def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     unique_suffix = uuid4().hex[:8]
     return f"batch_{current_time}_{unique_suffix}.json"
+
+def get_env(var_name, required=False, default=None):
+    value = os.getenv(var_name, default)
+    if required and value is None:
+        raise EnvironmentError(f"Missing required env var: {var_name}")
+    return value
