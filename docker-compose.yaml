@@ -133,7 +133,7 @@ services:
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
       - SUBSCRIPTION_NAME=${SUBSCRIPTION_NAME}
     deploy:
-      replicas: 2
+      replicas: 1
 
   azurite:
     container_name: azurite
