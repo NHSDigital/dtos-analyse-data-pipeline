@@ -21,7 +21,7 @@
         ],
         "Topics": [
           {
-            "Name": "topic.1",
+            "Name": "events",
             "Properties": {
               "DefaultMessageTimeToLive": "PT1H",
               "DuplicateDetectionHistoryTimeWindow": "PT20S",

@@ -2,14 +2,19 @@
   "IsEncrypted": false,
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
-    "AzureWebJobsServiceBus": "example",
     "FUNCTIONS_WORKER_RUNTIME": "python",
-    "FOUNDRY_PARENT_FOLDER_RID":example",
+    "USE_MANAGED_IDENTITY": "false",
+    "TOPIC_NAME": "events",
+    "SUBSCRIPTION_NAME": "subscription.3",
+    "FOUNDRY_PARENT_FOLDER_RID": "example",
+    "SERVICE_BUS_CONNECTION_STR": "example",
+    "SERVICE_BUS_NAMESPACE": "sb-emulator",
+    "FOUNDRY_PARENT_FOLDER_RID": "example",
     "FOUNDRY_API_URL": "example",
     "FOUNDRY_API_TOKEN": "example",
     "AZURITE_CONNECTION_STRING": "example",
     "AZURITE_CONTAINER_NAME": "inbound",
-    "ENVIRONMENT": "true",
-    "SERVICE_BUS_CONNECTION_STR": "example"
+    "TARGET_DATA_WAREHOUSE": "blob",
+    "FOUNDRY_RELAY_N_RECORDS_PER_BATCH": "10"
   }
 }
