@@ -10,7 +10,7 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
-# Environment Variable Names
+# Environment Variable Name
 ENV_VARS ={
     "ENV_FOUNDRY_URL" : os.getenv("FOUNDRY_API_URL"),
     "ENV_FOUNDRY_TOKEN" : os.getenv("FOUNDRY_API_TOKEN"),
