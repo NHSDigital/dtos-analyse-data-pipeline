@@ -385,7 +385,7 @@ variable "function_app_slots" {
 }
 
 variable "service_bus_subscriptions" {
-  description = "Configuration for event grid subscriptions"
+  description = "Configuration for service bus subscriptions"
   type = object({
     subscriber_config = map(object({
       subscription_name       = string
