@@ -201,6 +201,10 @@ function_apps = {
         {
           env_var_name          = "FOUNDRY_PARENT_FOLDER_RID"
           key_vault_secret_name = "FOUNDRY-PARENT-FOLDER-RID"
+        },
+        {
+          env_var_name          = "SERVICE_BUS_CONNECTION_STR"
+          key_vault_secret_name = "SERVICE-BUS-CONNECTION-STR"
         }
       ]
     }
