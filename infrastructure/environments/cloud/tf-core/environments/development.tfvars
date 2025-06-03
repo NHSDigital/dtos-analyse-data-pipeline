@@ -173,11 +173,10 @@ function_apps = {
       name_suffix                 = "service-layer"
       function_endpoint_name      = "service-layer"
       app_service_plan_key        = "DefaultServicePlan"
-      service_bus_topic_producers = ["dtoss-nsp"]
+      service_bus_topic_producers = ["dtoss-nsp-service-layer"]
       env_vars_static = {
         TOPIC_NAME               = "events"
         FUNCTIONS_WORKER_RUNTIME = "python"
-        USE_MANAGED_IDENTITY     = true
       }
     }
 
@@ -191,10 +190,8 @@ function_apps = {
         FOUNDRY_API_URL                   = "https://developersandbox.federateddataplatform.nhs.uk"
         SKIP_FOUNDRY_UPLOAD               = false
         SUBSCRIPTION_NAME                 = "event-dev-ap"
-        USE_MANAGED_IDENTITY              = true
         ENVIRONMENT                       = "cloud"
         FOUNDRY_RELAY_N_RECORDS_PER_BATCH = 10
-
       }
       env_vars_from_key_vault = [
         {
@@ -217,7 +214,7 @@ service_bus_subscriptions = {
     event-dev-ap = {
       subscription_name       = "events-sub"
       topic_name              = "events"
-      namespace_name          = "dtoss-nsp"
+      namespace_name          = "dtoss-nsp-service-layer"
       subscriber_functionName = "foundryRelay"
     }
   }
@@ -251,7 +248,7 @@ storage_accounts = {
 }
 
 service_bus = {
-  dtoss-nsp = {
+  dtoss-nsp-service-layer = {
     capacity         = 1
     sku_tier         = "Premium"
     max_payload_size = "100mb"
