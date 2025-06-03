@@ -83,8 +83,8 @@ ENV_FOUNDRY_TOKEN = "FOUNDRY_API_TOKEN"
 ENV_FOUNDRY_PARENT_FOLDER_RID = "FOUNDRY_PARENT_FOLDER_RID"
 ENV_AZURITE_CONNECTION_STRING = "AZURITE_CONNECTION_STRING"
 ENV_AZURITE_CONTAINER_NAME = "AZURITE_CONTAINER_NAME"
+ENV_TARGET_DW = "TARGET_DATA_WAREHOUSE"
 FOUNDRY_RELAY_N_RECORDS_PER_BATCH = "FOUNDRY_RELAY_N_RECORDS_PER_BATCH"
->>>>>>> cc5cd40 (DTOSS-9278: refactor env var)
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
@@ -129,9 +129,15 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         for i in range(0, len(lst), n):
             yield lst[i : i + n]
 
-    # Get batch size from environment variable, default to 10 if not set
     batch_size = int(os.getenv(FOUNDRY_RELAY_N_RECORDS_PER_BATCH, "10"))
 
+    target = os.getenv(ENV_TARGET_DW, "foundry").lower()
+    if target == "blob_storage":
+        writer = DataWarehouseBlobWriter()
+    else:
+        writer = DataWarehouseCloudWriter()
+
+    writer.setup()
     for chunk in chunks(batch_payloads, batch_size):
         file_name = generate_file_name()
         content = json.dumps(chunk, indent=2)
@@ -184,16 +190,9 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         logger.info(
             f"File '{file_name}' uploaded to: {', '.join(upload_destinations)}."
         )
->>>>>>> cc5cd40 (DTOSS-9278: refactor env var)
 
 
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     unique_suffix = uuid4().hex[:8]
     return f"batch_{current_time}_{unique_suffix}.json"
-
-def get_env(var_name, required=False, default=None):
-    value = os.getenv(var_name, default)
-    if required and value is None:
-        raise EnvironmentError(f"Missing required env var: {var_name}")
-    return value
