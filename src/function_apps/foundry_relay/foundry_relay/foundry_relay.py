@@ -16,7 +16,9 @@ ENV_FOUNDRY_TOKEN = "FOUNDRY_API_TOKEN"
 ENV_FOUNDRY_PARENT_FOLDER_RID = "FOUNDRY_PARENT_FOLDER_RID"
 ENV_AZURITE_CONNECTION_STRING = "AZURITE_CONNECTION_STRING"
 ENV_AZURITE_CONTAINER_NAME = "AZURITE_CONTAINER_NAME"
+ENV_TARGET_DW = "TARGET_DATA_WAREHOUSE"
 FOUNDRY_RELAY_N_RECORDS_PER_BATCH = "FOUNDRY_RELAY_N_RECORDS_PER_BATCH"
+
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
@@ -37,64 +39,67 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         for i in range(0, len(lst), n):
             yield lst[i : i + n]
 
-    # Get batch size from environment variable, default to 10 if not set
     batch_size = int(os.getenv(FOUNDRY_RELAY_N_RECORDS_PER_BATCH, "10"))
 
+    target = os.getenv(ENV_TARGET_DW, "foundry").lower()
+    if target == "blob_storage":
+        writer = DataWarehouseBlobWriter()
+    else:
+        writer = DataWarehouseCloudWriter()
+
+    writer.setup()
     for chunk in chunks(batch_payloads, batch_size):
-        file_name = generate_file_name()
-        content = json.dumps(chunk, indent=2)
-        upload_destinations = []
-
-        # Upload to Foundry Folder
-        try:
-            foundry_url = os.getenv(ENV_FOUNDRY_URL)
-            api_token = os.getenv(ENV_FOUNDRY_TOKEN)
-            parent_folder_rid = os.getenv(ENV_FOUNDRY_PARENT_FOLDER_RID)
-            if not foundry_url or not api_token or not parent_folder_rid:
-                raise EnvironmentError("Foundry environment variables are missing.")
-            client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
-            dataset_name = file_name.replace(".json", "")
-            dataset = client.datasets.Dataset.create(
-                name=dataset_name, parent_folder_rid=parent_folder_rid
-            )
-            client.datasets.Dataset.File.upload(
-                dataset_rid=dataset.rid,
-                file_path=file_name,
-                body=content.encode("utf-8"),
-            )
-            logger.info(f"File '{file_name}' uploaded to Foundry.")
-            upload_destinations.append("Foundry")
-        except Exception as foundry_error:
-            logger.error(f"Failed to upload batch to Foundry: {foundry_error}")
-
-        # Read ENVIRONMENT variable (default to 'cloud' if not set)
-        environment = os.getenv("ENVIRONMENT", "cloud").lower()
-
-        # Upload to local Azurite Blob if local development
-        if environment == "local":
-            try:
-                azurite_connection_string = os.getenv(ENV_AZURITE_CONNECTION_STRING)
-                azurite_container_name = os.getenv(ENV_AZURITE_CONTAINER_NAME)
-                if not azurite_connection_string or not azurite_container_name:
-                    raise EnvironmentError("Azurite Blob configuration is missing.")
-                blob_service_client = BlobServiceClient.from_connection_string(
-                    azurite_connection_string
-                )
-                blob_client = blob_service_client.get_blob_client(
-                    container=azurite_container_name, blob=file_name
-                )
-                blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
-                logger.info(f"File '{file_name}' uploaded to Azurite Blob.")
-                upload_destinations.append("Azurite Blob")
-            except Exception as blob_error:
-                logger.error(f"Failed to upload batch to Azurite Blob: {blob_error}")
-
-        logger.info(
-            f"File '{file_name}' uploaded to: {', '.join(upload_destinations)}."
-        )
+        writer.write(chunk)
+    writer.teardown()
 
 
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     unique_suffix = uuid4().hex[:8]
     return f"batch_{current_time}_{unique_suffix}.json"
+
+
+class DataWarehouseBlobWriter:
+    def setup(self):
+        self.connection_str = os.getenv(ENV_AZURITE_CONNECTION_STRING)
+        self.container = os.getenv(ENV_AZURITE_CONTAINER_NAME)
+        if not self.connection_str or not self.container:
+            raise EnvironmentError("Azurite Blob configuration is missing.")
+        self.client = BlobServiceClient.from_connection_string(self.connection_str)
+
+    def write(self, chunk):
+        file_name = generate_file_name()
+        content = json.dumps(chunk, indent=2)
+        blob_client = self.client.get_blob_client(container=self.container, blob=file_name)
+        blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
+        logger.info(f"File '{file_name}' uploaded to Azurite Blob.")
+
+    def teardown(self):
+        pass
+
+
+class DataWarehouseCloudWriter:
+    def setup(self):
+        self.foundry_url = os.getenv(ENV_FOUNDRY_URL)
+        self.api_token = os.getenv(ENV_FOUNDRY_TOKEN)
+        self.parent_folder_rid = os.getenv(ENV_FOUNDRY_PARENT_FOLDER_RID)
+        if not self.foundry_url or not self.api_token or not self.parent_folder_rid:
+            raise EnvironmentError("Foundry environment variables are missing.")
+        self.client = FoundryClient(auth=UserTokenAuth(self.api_token), hostname=self.foundry_url)
+
+    def write(self, chunk):
+        file_name = generate_file_name()
+        dataset_name = file_name.replace(".json", "")
+        content = json.dumps(chunk, indent=2)
+        dataset = self.client.datasets.Dataset.create(
+            name=dataset_name, parent_folder_rid=self.parent_folder_rid
+        )
+        self.client.datasets.Dataset.File.upload(
+            dataset_rid=dataset.rid,
+            file_path=file_name,
+            body=content.encode("utf-8"),
+        )
+        logger.info(f"File '{file_name}' uploaded to Foundry.")
+
+    def teardown(self):
+        pass
