@@ -22,6 +22,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         if not isinstance(payload, dict):
             return func.HttpResponse("Invalid payload format. Expected a JSON object.", status_code=HTTPStatus.BAD_REQUEST)
 
+        # Determine auth mode
+        use_managed_identity = os.getenv("USE_MANAGED_IDENTITY", "false").lower() == "true"
         topic_name = os.getenv("TOPIC_NAME")
 
         if not topic_name:
