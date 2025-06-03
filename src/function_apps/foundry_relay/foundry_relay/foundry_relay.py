@@ -8,28 +8,55 @@ from enum import Enum
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
-from typing import List
 
 logger = logging.getLogger(__name__)
 
-# Environment Variable Name
-FOUNDRY_API_URL = os.getenv("FOUNDRY_API_URL")
-FOUNDRY_API_TOKEN = os.getenv("FOUNDRY_API_TOKEN")
-FOUNDRY_PARENT_FOLDER_RID = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
-AZURITE_CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
-AZURITE_CONTAINER_NAME = os.getenv("AZURITE_CONTAINER_NAME")
-FOUNDRY_RELAY_N_RECORDS_PER_BATCH = os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH")
+
+# === ENV Tools ===
+def get_env(key: str, default=None, required=False):
+    value = os.getenv(key, default)
+    if required and value is None:
+        raise EnvironmentError(f"Missing required environment variable: {key}")
+    return value
+
+
+N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH"))
+TARGET_DATA_WAREHOUSE = get_env(
+    "TARGET_DATA_WAREHOUSE", default="blob"
+).lower()
+
+
+def load_foundry_env():
+    return {
+        "url": get_env("FOUNDRY_API_URL", required=True),
+        "token": get_env("FOUNDRY_API_TOKEN", required=True),
+        "folder": get_env("FOUNDRY_PARENT_FOLDER_RID", required=True),
+    }
+
+
+def load_blob_env():
+    return {
+        "conn_str": get_env("AZURITE_CONNECTION_STRING", required=True),
+        "container": get_env("AZURITE_CONTAINER_NAME", required=True),
+    }
+
+
+# === Enums & Target Detection ===
 class DataWarehouseTarget(Enum):
     FOUNDRY = "foundry"
     BLOB = "blob"
 
-def get_data_warehouse_target() -> DataWarehouseTarget:
-    value = os.getenv("TARGET_DATA_WAREHOUSE", "blob").lower()
-    try:
-        return DataWarehouseTarget(value)
-    except ValueError:
-        raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE value: {value}")
 
+def get_data_warehouse_target() -> DataWarehouseTarget:
+    try:
+        return DataWarehouseTarget(TARGET_DATA_WAREHOUSE)
+    except ValueError:
+        raise ValueError(
+            f"Unsupported TARGET_DATA_WAREHOUSE value: {TARGET_DATA_WAREHOUSE}"
+        )
+
+
+# === Writer Functions ===
 def write_to_foundry(
     file_name: str,
     content: str,
@@ -38,7 +65,10 @@ def write_to_foundry(
     parent_folder_rid: str,
 ):
     try:
-        client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
+        client = FoundryClient(
+            auth=UserTokenAuth(api_token),
+            hostname=foundry_url,
+        )
         dataset_name = file_name.replace(".json", "")
         dataset = client.datasets.Dataset.create(
             name=dataset_name, parent_folder_rid=parent_folder_rid
@@ -49,10 +79,9 @@ def write_to_foundry(
             body=content.encode("utf-8"),
         )
         logger.info(f"File '{file_name}' written to Foundry.")
-        return True
     except Exception as foundry_error:
         logger.error(f"Failed to write batch to Foundry: {foundry_error}")
-        return False
+        raise
 
 
 def write_to_blob(
@@ -70,25 +99,17 @@ def write_to_blob(
         )
         blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
         logger.info(f"File '{file_name}' written to Azurite Blob.")
-        return True
     except Exception as blob_error:
         logger.error(f"Failed to write batch to Azurite Blob: {blob_error}")
-        return False
+        raise
 
 
-# Environment Variable Names
-ENV_FOUNDRY_URL = "FOUNDRY_API_URL"
-ENV_FOUNDRY_TOKEN = "FOUNDRY_API_TOKEN"
-ENV_FOUNDRY_PARENT_FOLDER_RID = "FOUNDRY_PARENT_FOLDER_RID"
-ENV_AZURITE_CONNECTION_STRING = "AZURITE_CONNECTION_STRING"
-ENV_AZURITE_CONTAINER_NAME = "AZURITE_CONTAINER_NAME"
-ENV_TARGET_DW = "TARGET_DATA_WAREHOUSE"
-FOUNDRY_RELAY_N_RECORDS_PER_BATCH = "FOUNDRY_RELAY_N_RECORDS_PER_BATCH"
-
-
+# === Main Function ===
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
+    target = get_data_warehouse_target()
 
+    # Read and parse all valid messages
     batch_payloads = []
     for serviceBusMessage in serviceBusMessages:
         try:
@@ -97,84 +118,37 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             batch_payloads.append(payload)
         except Exception as e:
             logger.error(f"Error parsing message: {e}")
+
     if not batch_payloads:
         raise ValueError("No valid payloads to process.")
 
     file_name = generate_file_name()
     content = json.dumps(batch_payloads, indent=2)
-    write_destinations = []
-    if target == DataWarehouseTarget.FOUNDRY:
-        if write_to_foundry(
-            file_name, content, foundry_url, api_token, parent_folder_rid
-        ):
-            write_destinations.append("Foundry")
-    if target == DataWarehouseTarget.BLOB:
-        if write_to_blob(
-            file_name, content, azurite_connection_string, azurite_container_name
-        ):
-            write_destinations.append("Azurite Blob")
-    logger.info(f"File '{file_name}' written to: {', '.join(write_destinations)}.")
+
+    try:
+        if target == DataWarehouseTarget.FOUNDRY:
+            env = load_foundry_env()
+            write_to_foundry(
+                file_name, content, env["url"], env["token"], env["folder"]
+            )
+        elif target == DataWarehouseTarget.BLOB:
+            env = load_blob_env()
+            write_to_blob(
+                file_name,
+                content,
+                env["conn_str"],
+                env["container"],
+            )
+        else:
+            raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE: {target}")
+    except Exception as e:
+        logger.error(f"Failed to write to an unknown destination: {e}")
+        raise
 
 
-    def chunks(lst, n):
-        for i in range(0, len(lst), n):
-            yield lst[i : i + n]
-
-    # Get batch size from environment variable, default to 10 if not set
-    batch_size = int(os.getenv(FOUNDRY_RELAY_N_RECORDS_PER_BATCH, "10"))
-
-    for chunk in chunks(batch_payloads, batch_size):
-        writer.write(chunk)
-    writer.teardown()
-
-
+# === Utility ===
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     unique_suffix = uuid4().hex[:8]
     return f"batch_{current_time}_{unique_suffix}.json"
 
-
-class DataWarehouseBlobWriter:
-    def setup(self):
-        self.connection_str = os.getenv(ENV_AZURITE_CONNECTION_STRING)
-        self.container = os.getenv(ENV_AZURITE_CONTAINER_NAME)
-        if not self.connection_str or not self.container:
-            raise EnvironmentError("Azurite Blob configuration is missing.")
-        self.client = BlobServiceClient.from_connection_string(self.connection_str)
-
-    def write(self, chunk):
-        file_name = generate_file_name()
-        content = json.dumps(chunk, indent=2)
-        blob_client = self.client.get_blob_client(container=self.container, blob=file_name)
-        blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
-        logger.info(f"File '{file_name}' uploaded to Azurite Blob.")
-
-    def teardown(self):
-        pass
-
-
-class DataWarehouseCloudWriter:
-    def setup(self):
-        self.foundry_url = os.getenv(ENV_FOUNDRY_URL)
-        self.api_token = os.getenv(ENV_FOUNDRY_TOKEN)
-        self.parent_folder_rid = os.getenv(ENV_FOUNDRY_PARENT_FOLDER_RID)
-        if not self.foundry_url or not self.api_token or not self.parent_folder_rid:
-            raise EnvironmentError("Foundry environment variables are missing.")
-        self.client = FoundryClient(auth=UserTokenAuth(self.api_token), hostname=self.foundry_url)
-
-    def write(self, chunk):
-        file_name = generate_file_name()
-        dataset_name = file_name.replace(".json", "")
-        content = json.dumps(chunk, indent=2)
-        dataset = self.client.datasets.Dataset.create(
-            name=dataset_name, parent_folder_rid=self.parent_folder_rid
-        )
-        self.client.datasets.Dataset.File.upload(
-            dataset_rid=dataset.rid,
-            file_path=file_name,
-            body=content.encode("utf-8"),
-        )
-        logger.info(f"File '{file_name}' uploaded to Foundry.")
-
-    def teardown(self):
-        pass
