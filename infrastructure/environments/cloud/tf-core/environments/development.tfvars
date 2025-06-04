@@ -177,6 +177,7 @@ function_apps = {
       env_vars_static = {
         TOPIC_NAME               = "events"
         FUNCTIONS_WORKER_RUNTIME = "python"
+        USE_MANAGED_IDENTITY     = true
       }
     }
 
