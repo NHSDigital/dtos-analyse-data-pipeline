@@ -107,7 +107,7 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
   foundry-relay:
-    # container_name: foundry-relay
+    container_name: foundry-relay
     restart: always
     build:
       context: ./src/function_apps/foundry_relay
@@ -135,7 +135,7 @@ services:
       - SUBSCRIPTION_NAME=${SUBSCRIPTION_NAME}
       - USE_MANAGED_IDENTITY=${USE_MANAGED_IDENTITY}
     deploy:
-      replicas: 2
+      replicas: 1
 
   azurite:
     container_name: azurite
