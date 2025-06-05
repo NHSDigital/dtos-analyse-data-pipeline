@@ -5,10 +5,10 @@ src/function_apps/foundry_relay/foundry_relay.py
 
 * All external calls (Azure / Foundry) are stubbed.
 * Scenarios covered
-  1. Utility helpers behave correctly
-  2. Blob-only upload path
-  3. Foundry + Blob upload path (cloud + local)
-  4. Invalid JSON raises ValueError
+1. Utility helpers behave correctly
+2. Blob-only upload path
+3. Foundry + Blob upload path (cloud + local)
+4. Invalid JSON raises ValueError
 
 ► Expected overall coverage ≥ 80 %.
 """
