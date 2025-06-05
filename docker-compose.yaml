@@ -1,5 +1,3 @@
-name: dtos-analyse-data-pipeline
-
 services:
   bsselect-db:
     image: postgres:latest
