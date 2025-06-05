@@ -4,13 +4,14 @@ import os
 from datetime import datetime
 from uuid import uuid4
 from typing import List
+from enum import Enum
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
-# Environment Variable Name
+# Environment Variable Names
 ENV_VARS ={
     "ENV_FOUNDRY_URL" : os.getenv("FOUNDRY_API_URL"),
     "ENV_FOUNDRY_TOKEN" : os.getenv("FOUNDRY_API_TOKEN"),
@@ -18,21 +19,63 @@ ENV_VARS ={
     "ENV_AZURITE_CONNECTION_STRING": os.getenv("AZURITE_CONNECTION_STRING"),
     "ENV_AZURITE_CONTAINER_NAME": os.getenv("AZURITE_CONTAINER_NAME"),
     "FOUNDRY_RELAY_N_RECORDS_PER_BATCH": os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"),
-    "TARGET_DATAWAREHOUSE": os.getenv("TARGET_DATAWAREHOUSE", "blob"),
+    "TARGET_DATA_WAREHOUSE": os.getenv("TARGET_DATA_WAREHOUSE", "blob"),
 }
+
+class DataWarehouseTarget(Enum):
+    FOUNDRY = "foundry"
+    BLOB = "blob"
+
+def get_data_warehouse_target() -> DataWarehouseTarget:
+    value = os.getenv("TARGET_DATA_WAREHOUSE", "blob").lower()
+    try:
+        return DataWarehouseTarget(value)
+    except ValueError:
+        raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE value: {value}")
+
+# Convert all ENV_VARS into variables
+FOUNDRY_API_URL = os.getenv("FOUNDRY_API_URL")
+FOUNDRY_API_TOKEN = os.getenv("FOUNDRY_API_TOKEN")
+FOUNDRY_PARENT_FOLDER_RID = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
+AZURITE_CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
+AZURITE_CONTAINER_NAME = os.getenv("AZURITE_CONTAINER_NAME")
+FOUNDRY_RELAY_N_RECORDS_PER_BATCH = os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
+
+def write_to_foundry(file_name: str, content: str, foundry_url: str, api_token: str, parent_folder_rid: str):
+    try:
+        client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
+        dataset_name = file_name.replace(".json", "")
+        dataset = client.datasets.Dataset.create(
+            name=dataset_name, parent_folder_rid=parent_folder_rid
+        )
+        client.datasets.Dataset.File.upload(
+            dataset_rid=dataset.rid,
+            file_path=file_name,
+            body=content.encode("utf-8"),
+        )
+        logger.info(f"File '{file_name}' written to Foundry.")
+        return True
+    except Exception as foundry_error:
+        logger.error(f"Failed to write batch to Foundry: {foundry_error}")
+        return False
+
+def write_to_blob(file_name: str, content: str, azurite_connection_string: str, azurite_container_name: str):
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(
+            azurite_connection_string
+        )
+        blob_client = blob_service_client.get_blob_client(
+            container=azurite_container_name, blob=file_name
+        )
+        blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
+        logger.info(f"File '{file_name}' written to Azurite Blob.")
+        return True
+    except Exception as blob_error:
+        logger.error(f"Failed to write batch to Azurite Blob: {blob_error}")
+        return False
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
-
-    if ENV_VARS["TARGET_DATAWAREHOUSE"] == "foundry":
-        foundry_url = get_env("FOUNDRY_API_URL", required=True)
-        api_token = get_env("FOUNDRY_API_TOKEN", required=True)
-        parent_folder_rid = get_env("FOUNDRY_PARENT_FOLDER_RID", required=True)
-
-    if ENV_VARS["TARGET_DATAWAREHOUSE"] == "blob":
-        azurite_container_name = get_env("AZURITE_CONTAINER_NAME", required=True)
-        azurite_connection_string = get_env("AZURITE_CONNECTION_STRING", required=True)
-
     batch_payloads = []
     for serviceBusMessage in serviceBusMessages:
         try:
@@ -50,7 +93,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             yield lst[i : i + n]
 
     # Get batch size from environment variable, default to 10 if not set
-    batch_size = int(os.getenv(FOUNDRY_RELAY_N_RECORDS_PER_BATCH, "10"))
+    batch_size = int(os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"))
 
     for chunk in chunks(batch_payloads, batch_size):
         file_name = generate_file_name()
@@ -59,6 +102,9 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
 
         # Upload to Foundry Folder
         try:
+            foundry_url = os.getenv("FOUNDRY_API_URL")
+            api_token = os.getenv("FOUNDRY_API_TOKEN")
+            parent_folder_rid = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
             if not foundry_url or not api_token or not parent_folder_rid:
                 raise EnvironmentError("Foundry environment variables are missing.")
             client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
@@ -76,10 +122,14 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         except Exception as foundry_error:
             logger.error(f"Failed to upload batch to Foundry: {foundry_error}")
 
+        # Read ENVIRONMENT variable (default to 'cloud' if not set)
+        environment = os.getenv("ENVIRONMENT", "cloud").lower()
 
         # Upload to local Azurite Blob if local development
-        if get_env("TARGET_DATAWAREHOUSE", default="blob") == "blob":
+        if environment == "local":
             try:
+                azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
+                azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
                 if not azurite_connection_string or not azurite_container_name:
                     raise EnvironmentError("Azurite Blob configuration is missing.")
                 blob_service_client = BlobServiceClient.from_connection_string(
@@ -95,9 +145,8 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
                 logger.error(f"Failed to upload batch to Azurite Blob: {blob_error}")
 
         logger.info(
-            f"File '{file_name}' uploaded to: {', '.join(upload_destinations)}."
+            f"File '{file_name}' written to: {', '.join(write_destinations)}."
         )
-
 
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
