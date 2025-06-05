@@ -7,11 +7,11 @@ into sys.modules before importing the production code. That ensures that
 nothing tries to hit the real SDKs.
 
 Covers:
-  - generate_file_name uniqueness
-  - get_data_warehouse_target default
-  - Blob-only path
-  - Foundry+Blob path (local dev)
-  - Missing Foundry env‐vars path (falls back to Blob)
+- generate_file_name uniqueness
+- get_data_warehouse_target default
+- Blob-only path
+- Foundry+Blob path (local dev)
+- Missing Foundry env‐vars path (falls back to Blob)
 """
 
 import sys
