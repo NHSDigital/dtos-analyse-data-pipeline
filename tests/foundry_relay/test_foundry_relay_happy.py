@@ -1,3 +1,4 @@
+
 """
 Light-weight unit tests for:
 src/function_apps/foundry_relay/foundry_relay/foundry_relay.py
@@ -69,12 +70,33 @@ sys.modules["foundry_sdk.datasets"] = foundry_datasets_mod
 
 # ─── Now import the production code under test ─────────────────────────────────────
 
+
+# tests/test_foundry_relay_happy.py
+"""
+Light-weight unit tests for
+src/function_apps/foundry_relay/foundry_relay/foundry_relay.py
+
+* Stub-only: never touches real Azure / Foundry
+* 4 scenarios that exercise common and error branches; should lift
+  overall coverage to ~80 %+
+"""
+
+from __future__ import annotations
+
+import importlib
+import json
+from unittest.mock import patch, MagicMock
+
+import pytest
+
+# Dynamic import so the path isn’t hard-coded
 relay = importlib.import_module(
     "function_apps.foundry_relay.foundry_relay.foundry_relay"
 )
 main = relay.main
 generate_file_name = relay.generate_file_name
 get_data_warehouse_target = relay.get_data_warehouse_target
+
 
 # ─── Define Fake‐SDK stubs for use inside individual tests ─────────────────────────
 
