@@ -187,6 +187,7 @@ jobs:
 
       - name: "Start containers with docker-compose"
         run: |
+          cp .env.template .env
           docker-compose up -d
         working-directory: ${{ github.workspace }}
 
