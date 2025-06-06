@@ -65,6 +65,19 @@ def write_to_blob(file_name: str, content: str, azurite_connection_string: str, 
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
+
+    target = get_data_warehouse_target()
+
+    if target == DataWarehouseTarget.FOUNDRY:
+        foundry_url = get_env("FOUNDRY_API_URL", required=True)
+        api_token = get_env("FOUNDRY_API_TOKEN", required=True)
+        parent_folder_rid = get_env("FOUNDRY_PARENT_FOLDER_RID", required=True)
+    elif target == DataWarehouseTarget.BLOB:
+        azurite_container_name = get_env("AZURITE_CONTAINER_NAME", required=True)
+        azurite_connection_string = get_env("AZURITE_CONNECTION_STRING", required=True)
+    else:
+        raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE: {target}")
+
     batch_payloads = []
     for serviceBusMessage in serviceBusMessages:
         try:
@@ -80,58 +93,21 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     def chunks(lst, n):
         for i in range(0, len(lst), n):
             yield lst[i : i + n]
-
-    # Get batch size from environment variable, default to 10 if not set
-    batch_size = int(os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"))
+    batch_size = int(FOUNDRY_RELAY_N_RECORDS_PER_BATCH)
 
     for chunk in chunks(batch_payloads, batch_size):
         file_name = generate_file_name()
         content = json.dumps(chunk, indent=2)
-        upload_destinations = []
 
-        # Upload to Foundry Folder
-        try:
-            foundry_url = os.getenv("FOUNDRY_API_URL")
-            api_token = os.getenv("FOUNDRY_API_TOKEN")
-            parent_folder_rid = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
-            if not foundry_url or not api_token or not parent_folder_rid:
-                raise EnvironmentError("Foundry environment variables are missing.")
-            client = FoundryClient(auth=UserTokenAuth(api_token), hostname=foundry_url)
-            dataset_name = file_name.replace(".json", "")
-            dataset = client.datasets.Dataset.create(
-                name=dataset_name, parent_folder_rid=parent_folder_rid
-            )
-            client.datasets.Dataset.File.upload(
-                dataset_rid=dataset.rid,
-                file_path=file_name,
-                body=content.encode("utf-8"),
-            )
-            logger.info(f"File '{file_name}' uploaded to Foundry.")
-            upload_destinations.append("Foundry")
-        except Exception as foundry_error:
-            logger.error(f"Failed to upload batch to Foundry: {foundry_error}")
+        write_destinations = []
 
-        # Read ENVIRONMENT variable (default to 'cloud' if not set)
-        environment = os.getenv("ENVIRONMENT", "cloud").lower()
+        if target == DataWarehouseTarget.FOUNDRY:
+            if write_to_foundry(file_name, content, foundry_url, api_token, parent_folder_rid):
+                write_destinations.append("Foundry")
 
-        # Upload to local Azurite Blob if local development
-        if environment == "local":
-            try:
-                azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
-                azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
-                if not azurite_connection_string or not azurite_container_name:
-                    raise EnvironmentError("Azurite Blob configuration is missing.")
-                blob_service_client = BlobServiceClient.from_connection_string(
-                    azurite_connection_string
-                )
-                blob_client = blob_service_client.get_blob_client(
-                    container=azurite_container_name, blob=file_name
-                )
-                blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
-                logger.info(f"File '{file_name}' uploaded to Azurite Blob.")
-                upload_destinations.append("Azurite Blob")
-            except Exception as blob_error:
-                logger.error(f"Failed to upload batch to Azurite Blob: {blob_error}")
+        if target == DataWarehouseTarget.BLOB:
+            if write_to_blob(file_name, content, azurite_connection_string, azurite_container_name):
+                write_destinations.append("Azurite Blob")
 
         logger.info(
             f"File '{file_name}' written to: {', '.join(write_destinations)}."
