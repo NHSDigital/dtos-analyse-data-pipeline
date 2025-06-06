@@ -11,16 +11,13 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
-# Environment Variable Names
-ENV_VARS ={
-    "ENV_FOUNDRY_URL" : os.getenv("FOUNDRY_API_URL"),
-    "ENV_FOUNDRY_TOKEN" : os.getenv("FOUNDRY_API_TOKEN"),
-    "ENV_FOUNDRY_PARENT_FOLDER_RID": os.getenv("FOUNDRY_PARENT_FOLDER_RID"),
-    "ENV_AZURITE_CONNECTION_STRING": os.getenv("AZURITE_CONNECTION_STRING"),
-    "ENV_AZURITE_CONTAINER_NAME": os.getenv("AZURITE_CONTAINER_NAME"),
-    "FOUNDRY_RELAY_N_RECORDS_PER_BATCH": os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"),
-    "TARGET_DATA_WAREHOUSE": os.getenv("TARGET_DATA_WAREHOUSE", "blob"),
-}
+# Environment Variable Name
+FOUNDRY_API_URL = os.getenv("FOUNDRY_API_URL")
+FOUNDRY_API_TOKEN = os.getenv("FOUNDRY_API_TOKEN")
+FOUNDRY_PARENT_FOLDER_RID = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
+AZURITE_CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
+AZURITE_CONTAINER_NAME = os.getenv("AZURITE_CONTAINER_NAME")
+FOUNDRY_RELAY_N_RECORDS_PER_BATCH = os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
 
 class DataWarehouseTarget(Enum):
     FOUNDRY = "foundry"
@@ -32,14 +29,6 @@ def get_data_warehouse_target() -> DataWarehouseTarget:
         return DataWarehouseTarget(value)
     except ValueError:
         raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE value: {value}")
-
-# Convert all ENV_VARS into variables
-FOUNDRY_API_URL = os.getenv("FOUNDRY_API_URL")
-FOUNDRY_API_TOKEN = os.getenv("FOUNDRY_API_TOKEN")
-FOUNDRY_PARENT_FOLDER_RID = os.getenv("FOUNDRY_PARENT_FOLDER_RID")
-AZURITE_CONNECTION_STRING = os.getenv("AZURITE_CONNECTION_STRING")
-AZURITE_CONTAINER_NAME = os.getenv("AZURITE_CONTAINER_NAME")
-FOUNDRY_RELAY_N_RECORDS_PER_BATCH = os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
 
 def write_to_foundry(file_name: str, content: str, foundry_url: str, api_token: str, parent_folder_rid: str):
     try:
