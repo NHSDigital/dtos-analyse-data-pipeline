@@ -32,6 +32,9 @@ on:
         required: true
         type: string
 
+variables:
+  - group: Automated_Functional_Tests
+
 jobs:
   environment-set-up:
     name: "Environment set up"
@@ -183,7 +186,7 @@ jobs:
 
       - name: "Show secret value (for debug only, remove in production!)"
         run: |
-          echo "Secret1: $(SERINS_DATABASE_CONNECTION_STRING)"
+          echo "Secret1: $(test}"
 
       - name: "Start containers with docker-compose"
         run: |
@@ -214,6 +217,9 @@ jobs:
           name: pytest-report
           path: report.html
 
+      - name: "Print API URL"
+        run: |
+          echo "API URL: $(test)"
 
   environment-tear-down:
     name: "Environment tear down"
