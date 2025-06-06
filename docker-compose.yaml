@@ -46,7 +46,8 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - NSP_SERVICE_LAYER_URL=${NSP_SERVICE_LAYER_URL}
     depends_on:
-      - bsselect-db
+      bsselect-db:
+        condition: service_healthy
     networks:
       sb-emulator:
         aliases:
