@@ -30,6 +30,35 @@ UPDATE subjects SET age=99 WHERE ID = 1;
 DELETE FROM subjects WHERE ID = 1;
 ```
 
+## Interactive development
+
+TLDR - Make sure no containers are running. Start VSCode. Run the command `Dev Containers: Reopen in Container`. Chose the container you want.
+
+
+### Overview
+
+We use VSCode [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) for interactive local development.
+Specifically, the [Connect to multiple containers](http://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) option.
+In principle, this lets you connect to any container in the [docker-compose](../../../docker-compose.yaml) stack.
+In practice, we only setup connections to the containers we want to develop in:
+
+- [bsselect-event-poster](../../../.devcontainer/bsselect-event-poster)
+
+
+### Setting things up
+
+The first time you enter a container, install @recommented VSCode extensions.
+
+
+### Troubleshooting
+
+- General fixes:
+  - Cleaning up containers. E.g. `docker rm --all --force`
+  - Checking container logs. E.g. `docker logs -f bsselect-db`
+
+- 'Workspace does not exist'
+  - Run `docker compose down` to avoid VSCode getting confused about duplicate containers.
+
 ## Troubleshooting
 
 - If postgres is not initialised correctly, remove the postgres container and run `make` (or `docker compose`) again.
