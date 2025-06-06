@@ -8,7 +8,7 @@
       "connection": "SERVICE_BUS_CONNECTION_STR",
       "subscriptionName": "%SUBSCRIPTION_NAME%",
       "cardinality": "many",
-      "maxMessageCount": "%BATCH_SIZE%",
+      "maxMessageCount": "%FOUNDRY_RELAY_N_RECORDS_PER_BATCH%",
       "isBatched": true
     }
   ]
