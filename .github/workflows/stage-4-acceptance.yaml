@@ -31,9 +31,8 @@ on:
         description: "Version of the software, set by the CI/CD pipeline workflow"
         required: true
         type: string
-
-variables:
-  - group: Automated_Functional_Tests
+env:
+  DAY_OF_WEEK: Monday
 
 jobs:
   environment-set-up:
@@ -186,7 +185,7 @@ jobs:
 
       - name: "Show secret value (for debug only, remove in production!)"
         run: |
-          echo "Secret1: $(test}"
+          echo "Secret1: $DAY_OF_WEEK"
 
       - name: "Start containers with docker-compose"
         run: |
