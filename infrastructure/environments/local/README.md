@@ -34,13 +34,12 @@ DELETE FROM subjects WHERE ID = 1;
 
 TLDR - Make sure no containers are running. Start VSCode. Run the command `Dev Containers: Reopen in Container`. Chose the container you want.
 
-
 ### Overview
 
 We use VSCode [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) for interactive local development.
 Specifically, the [Connect to multiple containers](http://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) option.
 The VScode command `Dev Containers: Add Dev Container Configuration Files...` gives a starter config for each container.
-Config documentation is [here](https://containers.dev/implementors/json_reference/).
+For more config documentation, see: [json reference](https://containers.dev/implementors/json_reference/).
 In principle, this lets you connect to any container in the [docker-compose](../../../docker-compose.yaml) stack.
 In practice, we only setup connections to the containers we want to develop in:
 
@@ -50,7 +49,6 @@ In practice, we only setup connections to the containers we want to develop in:
 ### Setting things up
 
 The first time you enter a container, install @recommented VSCode extensions.
-
 
 ### Troubleshooting
 
@@ -64,4 +62,4 @@ The first time you enter a container, install @recommented VSCode extensions.
 ## Troubleshooting
 
 - If postgres is not initialised correctly, remove the postgres container and run `make` (or `docker compose`) again.
-  For more, see [here](https://hub.docker.com/_/postgres#:~:text=starting%20the%20service.-,Warning,-%3A%20scripts%20in%20/docker).
+  For more, see [official image docs](https://hub.docker.com/_/postgres#:~:text=starting%20the%20service.-,Warning,-%3A%20scripts%20in%20/docker).
