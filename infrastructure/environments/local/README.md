@@ -40,6 +40,7 @@ TLDR - Make sure no containers are running. Start VSCode. Run the command `Dev C
 We use VSCode [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) for interactive local development.
 Specifically, the [Connect to multiple containers](http://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) option.
 The VScode command `Dev Containers: Add Dev Container Configuration Files...` gives a starter config for each container.
+Config documentation is [here](https://containers.dev/implementors/json_reference/).
 In principle, this lets you connect to any container in the [docker-compose](../../../docker-compose.yaml) stack.
 In practice, we only setup connections to the containers we want to develop in:
 
