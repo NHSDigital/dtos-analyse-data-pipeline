@@ -16,8 +16,8 @@
 
 	// The optional 'workspaceFolder' property is the path VS Code should open by default when
 	// connected. This is typically a file mount in .devcontainer/docker-compose.yml
-  // "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-  "workspaceFolder": "/workspaces",
+	// "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+	"workspaceFolder": "/workspaces/infrastructure/environments/local/bsselect-event-poster",
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -36,12 +36,12 @@
 
 	// Configure tool-specific properties.
 	"customizations": {
-    "vscode": {
-      "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python"
-      }
-    }
-  },
+		"vscode": {
+			"settings": {
+				"python.defaultInterpreterPath": "/usr/local/bin/python"
+			}
+		}
+	},
 
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "devcontainer"
