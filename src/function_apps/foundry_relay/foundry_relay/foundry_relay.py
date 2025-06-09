@@ -64,6 +64,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
 
         # Upload to local Azurite Blob if local development
         if environment == "local":
+            logger.info("Using the local environment.")
             try:
                 azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
                 azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
@@ -82,6 +83,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
                 logger.error(f"Failed to upload batch to Azurite Blob: {blob_error}")
 
         elif environment == "cloud":
+            logger.info("Using the cloud environment.")
             try:
                 storage_account_name = os.getenv("STORAGE_ACCOUNT_NAME")
                 container_name = os.getenv("STORAGE_CONTAINER_NAME")
