@@ -81,6 +81,24 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             except Exception as blob_error:
                 logger.error(f"Failed to upload batch to Azurite Blob: {blob_error}")
 
+        elif environment == "cloud":
+            try:
+                storage_account_name = os.getenv("STORAGE_ACCOUNT_NAME")
+                container_name = os.getenv("STORAGE_CONTAINER_NAME")
+                if not storage_account_name or not container_name:
+                    raise EnvironmentError("Storage account name or container is missing.")
+
+                account_url = f"https://{storage_account_name}.blob.core.windows.net"
+                credential = DefaultAzureCredential()  # Uses managed identity
+
+                blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
+                blob_client = blob_service_client.get_blob_client(
+                    container=container_name, blob=file_name
+                )
+                blob_client.upload_blob(content.encode("utf-8"), overwrite=True)
+                logger.info(f"File '{file_name}' uploaded to Azure Blob Storage.")
+                upload_destinations.append("Azure Blob Storage")
+
         logger.info(
             f"File '{file_name}' uploaded to: {', '.join(upload_destinations)}."
         )
