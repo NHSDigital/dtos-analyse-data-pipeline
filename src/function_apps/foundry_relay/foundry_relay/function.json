@@ -1,15 +1,10 @@
 {
   "bindings": [
     {
-      "type": "serviceBusTrigger",
-      "direction": "in",
       "name": "serviceBusMessages",
-      "topicName": "%TOPIC_NAME%",
-      "connection": "SERVICE_BUS_CONNECTION_STR",
-      "subscriptionName": "%SUBSCRIPTION_NAME%",
-      "cardinality": "many",
-      "maxMessageCount": "%FOUNDRY_RELAY_N_RECORDS_PER_BATCH%",
-      "isBatched": true
+      "type": "mytimer",
+      "direction": "in",
+      "schedule": "0 */5 * * * *"
     }
   ]
 }
