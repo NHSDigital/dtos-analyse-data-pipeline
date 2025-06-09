@@ -91,6 +91,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
                     raise EnvironmentError("Storage account name or container is missing.")
 
                 account_url = f"https://{storage_account_name}.blob.core.windows.net"
+                logger.info(f"account_url '{account_url}'.")
                 credential = DefaultAzureCredential()  # Uses managed identity
 
                 blob_service_client = BlobServiceClient(account_url=account_url, credential=credential)
