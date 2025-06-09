@@ -191,7 +191,7 @@ function_apps = {
         FOUNDRY_API_URL                   = "https://developersandbox.federateddataplatform.nhs.uk"
         SKIP_FOUNDRY_UPLOAD               = false
         SUBSCRIPTION_NAME                 = "event-dev-ap"
-        ENVIRONMENT                       = "cloud"
+        TARGET_DATA_WAREHOUSE             = "foundry"
         FOUNDRY_RELAY_N_RECORDS_PER_BATCH = 10
       }
       env_vars_from_key_vault = [
