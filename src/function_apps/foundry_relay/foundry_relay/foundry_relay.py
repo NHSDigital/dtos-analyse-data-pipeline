@@ -4,62 +4,32 @@ import os
 from datetime import datetime
 from uuid import uuid4
 from typing import List
-
 import azure.functions as func
-from azure.identity import DefaultAzureCredential
-from azure.servicebus import ServiceBusClient
-
 from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
+from typing import List
 
 logger = logging.getLogger(__name__)
 
-def main(mytimer: func.TimerRequest) -> None:
-    logger.info("Timer-triggered Foundry relay function started.")
-
-    # Step 1: Connect to Service Bus using Managed Identity
-    service_bus_namespace = os.getenv("SERVICE_BUS_NAMESPACE")
-    topic_name = os.getenv("TOPIC_NAME")
-    subscription_name = os.getenv("SUBSCRIPTION_NAME")
-    if not service_bus_namespace or not topic_name or not subscription_name:
-        raise EnvironmentError("SERVICE_BUS_NAMESPACE, TOPIC_NAME, or SUBSCRIPTION_NAME not set.")
-
-    credential = DefaultAzureCredential()
-    servicebus_client = ServiceBusClient(service_bus_namespace, credential)
-
+def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
+    logger.info("Foundry batch upload function triggered by Service Bus.")
     batch_payloads = []
-
-    # Step 2: Pull messages
-    try:
-        with servicebus_client:
-            receiver = servicebus_client.get_subscription_receiver(
-                topic_name=topic_name,
-                subscription_name=subscription_name,
-                max_wait_time=5  # seconds
-            )
-            with receiver:
-                messages = receiver.receive_messages(max_message_count=50)
-                for msg in messages:
-                    try:
-                        message_body = msg.body.decode("utf-8")
-                        payload = json.loads(message_body)
-                        batch_payloads.append(payload)
-                        receiver.complete_message(msg)
-                    except Exception as e:
-                        logger.error(f"Error parsing or completing message: {e}")
-    except Exception as e:
-        logger.error(f"Failed to pull messages from Service Bus: {e}")
-        return
+    for serviceBusMessage in serviceBusMessages:
+        try:
+            message_body = serviceBusMessage.get_body().decode("utf-8")
+            payload = json.loads(message_body)
+            batch_payloads.append(payload)
+        except Exception as e:
+            logger.error(f"Error parsing message: {e}")
 
     if not batch_payloads:
-        logger.info("No messages received from Service Bus.")
-        return
+        raise ValueError("No valid payloads to process.")
 
-    # Step 3: Process in chunks
     def chunks(lst, n):
         for i in range(0, len(lst), n):
             yield lst[i : i + n]
 
+    # Get batch size from environment variable, default to 10 if not set
     batch_size = int(os.getenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10"))
 
     for chunk in chunks(batch_payloads, batch_size):
@@ -67,7 +37,7 @@ def main(mytimer: func.TimerRequest) -> None:
         content = json.dumps(chunk, indent=2)
         upload_destinations = []
 
-        # Upload to Foundry
+        # Upload to Foundry Folder
         try:
             foundry_url = os.getenv("FOUNDRY_API_URL")
             api_token = os.getenv("FOUNDRY_API_TOKEN")
@@ -89,9 +59,12 @@ def main(mytimer: func.TimerRequest) -> None:
         except Exception as foundry_error:
             logger.error(f"Failed to upload batch to Foundry: {foundry_error}")
 
-        # Upload to Azurite if local
+        # Read ENVIRONMENT variable (default to 'cloud' if not set)
         environment = os.getenv("ENVIRONMENT", "cloud").lower()
+
+        # Upload to local Azurite Blob if local development
         if environment == "local":
+            logger.info("Using the local environment.")
             try:
                 azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
                 azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
@@ -112,6 +85,7 @@ def main(mytimer: func.TimerRequest) -> None:
         logger.info(
             f"File '{file_name}' uploaded to: {', '.join(upload_destinations)}."
         )
+
 
 def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

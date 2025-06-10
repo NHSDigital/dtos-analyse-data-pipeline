@@ -1,10 +1,15 @@
 {
   "bindings": [
     {
-      "name": "mytimer",
-      "type": "timerTrigger",
+      "type": "serviceBusTrigger",
       "direction": "in",
-      "schedule": "0 */5 * * * *"
+      "name": "serviceBusMessages",
+      "topicName": "%TOPIC_NAME%",
+      "connection": "SERVICE_BUS_NAMESPACE",
+      "subscriptionName": "%SUBSCRIPTION_NAME%",
+      "cardinality": "many",
+      "maxMessageCount": "%FOUNDRY_RELAY_N_RECORDS_PER_BATCH%",
+      "isBatched": true
     }
   ]
 }
