@@ -4,9 +4,16 @@
     "id": "Microsoft.Azure.Functions.ExtensionBundle",
     "version": "[4.*, 5.0.0)"
   },
+  "extensions": {
+    "serviceBus": {
+      "prefetchCount": 1000,
+      "maxConcurrentCalls": 128
+    }
+  },
   "logging": {
     "logLevel": {
       "default": "Information",
+      "Host.Triggers.ServiceBus": "Error",
       "Azure.Messaging.ServiceBus": "Error",
       "Azure.Core": "Error"
     }

@@ -192,7 +192,7 @@ function_apps = {
         SKIP_FOUNDRY_UPLOAD               = false
         SUBSCRIPTION_NAME                 = "event-dev-ap"
         ENVIRONMENT                       = "cloud"
-        FOUNDRY_RELAY_N_RECORDS_PER_BATCH = 10
+        FOUNDRY_RELAY_N_RECORDS_PER_BATCH = 1000
       }
       env_vars_from_key_vault = [
         {
