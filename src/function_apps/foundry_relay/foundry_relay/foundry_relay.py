@@ -88,6 +88,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     )
 
     target = get_data_warehouse_target()
+    logger.info(f"Using target: {target}")
     if target == DataWarehouseTarget.FOUNDRY:
         foundry_url = get_env("FOUNDRY_API_URL", required=True)
         api_token = get_env("FOUNDRY_API_TOKEN", required=True)
