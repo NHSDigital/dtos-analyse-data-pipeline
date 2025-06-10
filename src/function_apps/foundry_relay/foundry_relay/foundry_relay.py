@@ -64,6 +64,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
 
         # Upload to local Azurite Blob if local development
         if environment == "local":
+            logger.info("Using the local environment.")
             try:
                 azurite_connection_string = os.getenv("AZURITE_CONNECTION_STRING")
                 azurite_container_name = os.getenv("AZURITE_CONTAINER_NAME")
