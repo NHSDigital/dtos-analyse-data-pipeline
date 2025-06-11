@@ -77,10 +77,10 @@ curl-service-layer-function: # Send a POST request to the Service Layer Function
 
 curl-service-layer-function-loop: # Send the payload to the Service Layer Function 100 times
 		@echo "Sending payload to the Service Layer Function multiple times in parallel..."
-		seq 100 | xargs -P 10 -I{} curl -s -X POST http://localhost:7072/api/service_layer \
+		seq 1000 | xargs -P 10 -I{} curl -s -X POST http://localhost:7072/api/service_layer \
 				-H "Content-Type: application/json" \
 				--data @infrastructure/environments/local/payload.json
-		@echo "All 100 requests sent."
+		@echo "All 1000 requests sent."
 
 scale-foundry-relay-up: # Scale foundry-relay service up to 2 replicas
 		@echo "Scaling foundry-relay service up to 2 replicas..."

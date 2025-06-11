@@ -107,7 +107,7 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
 
   foundry-relay:
-    container_name: foundry-relay
+    # container_name: foundry-relay
     restart: always
     build:
       context: ./src/function_apps/foundry_relay
@@ -127,7 +127,6 @@ services:
       - FOUNDRY_PARENT_FOLDER_RID=${FOUNDRY_PARENT_FOLDER_RID}
       - AZURITE_CONNECTION_STRING=${AZURITE_CONNECTION_STRING}
       - AZURITE_CONTAINER_NAME=${AZURITE_CONTAINER_NAME}
-      - ENVIRONMENT=${ENVIRONMENT}
       - FOUNDRY_RELAY_N_RECORDS_PER_BATCH=${FOUNDRY_RELAY_N_RECORDS_PER_BATCH}
       - ASPNETCORE_URLS=http://0.0.0.0:7071
       - TOPIC_NAME=${TOPIC_NAME}
@@ -135,8 +134,9 @@ services:
       - SERVICE_BUS_CONNECTION_STR=${SERVICE_BUS_CONNECTION_STR}
       - SUBSCRIPTION_NAME=${SUBSCRIPTION_NAME}
       - USE_MANAGED_IDENTITY=${USE_MANAGED_IDENTITY}
+      - FUNCTIONS_WORKER_PROCESS_COUNT=4
     deploy:
-      replicas: 1
+      replicas: 4
 
   azurite:
     container_name: azurite
