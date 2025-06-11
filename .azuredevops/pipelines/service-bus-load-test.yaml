@@ -22,6 +22,8 @@ stages:
   jobs:
     - job: bulk_load_job
       displayName: Run Azure Bulk Load Script
+      env:
+        SERVICE_BUS_CONNECTION: "$(serviceBusConnectionString)"
       pool:
         vmImage: 'ubuntu-latest'
       steps:
@@ -42,9 +44,8 @@ stages:
           displayName: 'Install Python Dependencies'
 
         - script: |
-            find .
-            export SERVICE_BUS_CONNECTION_STR=$(SERVICE_BUS_CONNECTION_STR)
-            echo $SERVICE_BUS_CONNECTION_STR
+            export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION_STR"
+            echo "$SERVICE_BUS_CONNECTION_STR"
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
               --topic events \
               --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
