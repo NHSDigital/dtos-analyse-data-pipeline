@@ -43,4 +43,4 @@ stages:
               --concurrency 2
           displayName: 'Run azure_bulk_load.py'
           env:
-            SERVICE_BUS_CONNECTION: "$(serviceBusConnectionString)"
+            SERVICE_BUS_CONNECTION: "$(SERVICE_BUS_CONNECTION_STR)"
