@@ -2,6 +2,10 @@ name: $(Build.SourceBranchName)-$(Date:yyyyMMdd)_$(Rev:r)
 trigger: none
 pr: none
 
+pool:
+  # vmImage: ubuntu-latest
+  name: private-pool-dev-uks
+
 resources:
   repositories:
     - repository: dtos-devops-templates
@@ -19,8 +23,6 @@ stages:
   jobs:
     - job: bulk_load_job
       displayName: Run Azure Bulk Load Script
-      pool:
-        vmImage: 'ubuntu-latest'
       steps:
         - checkout: self
         - checkout: dtos-devops-templates
