@@ -6,6 +6,28 @@ pool:
   # vmImage: ubuntu-latest
   name: private-pool-dev-uks
 
+parameters:
+  - name: rows
+    type: number
+    default: 50000
+    values:
+      - 50000
+      - 100000
+      - 200000
+      - 400000
+      - 500000
+      - 1000000
+
+  - name: concurrency
+    type: number
+    default: 2
+    values:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+
 resources:
   repositories:
     - repository: dtos-devops-templates
@@ -42,8 +64,8 @@ stages:
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
               --topic events \
               --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
-              --rows 50000 \
-              --concurrency 2
+              --rows ${{ parameters.rows }} \
+              --concurrency ${{ parameters.concurrency }}
           displayName: 'Run azure_bulk_load.py'
           env:
             SERVICE_BUS_CONNECTION: "$(SERVICE_BUS_CONNECTION_STR)"
