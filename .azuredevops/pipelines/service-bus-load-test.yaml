@@ -39,6 +39,11 @@ stages:
 
         - script: |
             find .
-            python scripts/azure/azure_bulk_load.py
+            export SERVICE_BUS_CONNECTION_STR="Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;"
+            python scripts/send_async_to_topic.py \
+              --topic topic.1 \
+              --file /Users/adamsheldon/Desktop/workspace2/dtos-analyse-data-pipeline/data/audit_episodes_20250523.csv \
+              --rows 50000 \
+              --concurrency 2
           # workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
           displayName: 'Run azure_bulk_load.py'
