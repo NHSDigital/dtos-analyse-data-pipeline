@@ -38,6 +38,7 @@ stages:
           displayName: 'Install Python Dependencies'
 
         - script: |
+            find .
             python scripts/azure/azure_bulk_load.py
-          workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
+          # workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
           displayName: 'Run azure_bulk_load.py'
