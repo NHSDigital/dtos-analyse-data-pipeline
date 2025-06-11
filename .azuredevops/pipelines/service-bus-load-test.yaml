@@ -31,9 +31,10 @@ stages:
         - script: |
             python -m pip install --upgrade pip
             if [ -f scripts/azure/requirements.txt ]; then
+              pip install azure-servicebus
               pip install -r scripts/azure/requirements.txt
             fi
-          workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
+          # workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
           displayName: 'Install Python Dependencies'
 
         - script: |
