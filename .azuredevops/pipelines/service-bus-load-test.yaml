@@ -1,6 +1,3 @@
-
----
-
 name: $(Build.SourceBranchName)-$(Date:yyyyMMdd)_$(Rev:r)
 trigger: none
 pr: none
@@ -22,8 +19,6 @@ stages:
   jobs:
     - job: bulk_load_job
       displayName: Run Azure Bulk Load Script
-      env:
-        SERVICE_BUS_CONNECTION: "$(serviceBusConnectionString)"
       pool:
         vmImage: 'ubuntu-latest'
       steps:
@@ -36,20 +31,16 @@ stages:
 
         - script: |
             python -m pip install --upgrade pip
-            # if [ -f scripts/azure/requirements.txt ]; then
             pip install azure-servicebus azure-identity
-            # pip install -r scripts/azure/requirements.txt
-            # fi
-          # workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
           displayName: 'Install Python Dependencies'
 
         - script: |
-            export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION_STR"
-            echo "$SERVICE_BUS_CONNECTION_STR"
+            echo "SERVICE_BUS_CONNECTION: $SERVICE_BUS_CONNECTION"
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
               --topic events \
               --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
               --rows 50000 \
               --concurrency 2
-          # workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
           displayName: 'Run azure_bulk_load.py'
+          env:
+            SERVICE_BUS_CONNECTION: "$(serviceBusConnectionString)"
