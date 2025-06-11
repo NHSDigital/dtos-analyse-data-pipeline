@@ -3,7 +3,6 @@ trigger: none
 pr: none
 
 pool:
-  # vmImage: ubuntu-latest
   name: private-pool-dev-uks
 
 parameters:
@@ -33,7 +32,7 @@ resources:
     - repository: dtos-devops-templates
       type: github
       name: NHSDigital/dtos-devops-templates
-      ref: feat/DTOSS-9224-optimise-foundry-relay-for-high-volume-event-processing
+      ref: main
       endpoint: NHSDigital
 
 variables:
@@ -60,7 +59,6 @@ stages:
 
         - script: |
             export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION"
-            echo "SERVICE BUS CONNECTION STR: $SERVICE_BUS_CONNECTION_STR"
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
               --topic events \
               --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
