@@ -1,0 +1,42 @@
+
+---
+
+name: $(Build.SourceBranchName)-$(Date:yyyyMMdd)_$(Rev:r)
+trigger: none
+pr: none
+
+resources:
+  repositories:
+    - repository: dtos-devops-templates
+      type: github
+      name: NHSDigital/dtos-devops-templates
+      ref: feat/DTOSS-9224-optimise-foundry-relay-for-high-volume-event-processing
+      endpoint: NHSDigital
+
+stages:
+- stage: load_test_service_bus
+  displayName: Load Test Service Bus
+  jobs:
+    - job: bulk_load_job
+      displayName: Run Azure Bulk Load Script
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+        - checkout: dtos-devops-templates
+
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.10'
+
+        - script: |
+            python -m pip install --upgrade pip
+            if [ -f scripts/azure/requirements.txt ]; then
+              pip install -r scripts/azure/requirements.txt
+            fi
+          workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
+          displayName: 'Install Python Dependencies'
+
+        - script: |
+            python scripts/azure/azure_bulk_load.py
+          workingDirectory: $(Build.SourcesDirectory)/dtos-devops-templates
+          displayName: 'Run azure_bulk_load.py'
