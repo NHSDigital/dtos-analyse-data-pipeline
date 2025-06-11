@@ -35,7 +35,8 @@ stages:
           displayName: 'Install Python Dependencies'
 
         - script: |
-            echo "SERVICE_BUS_CONNECTION: $SERVICE_BUS_CONNECTION"
+            export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION"
+            echo "SERVICE BUS CONNECTION STR: $SERVICE_BUS_CONNECTION_STR"
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
               --topic events \
               --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
