@@ -1,0 +1,6 @@
+pytest
+pytest-bdd
+requests
+python-dotenv
+azure-storage-blob
+pytest-html
