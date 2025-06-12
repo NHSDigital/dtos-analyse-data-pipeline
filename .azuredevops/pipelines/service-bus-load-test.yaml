@@ -43,7 +43,7 @@ resources:
     - repository: dtos-devops-templates
       type: github
       name: NHSDigital/dtos-devops-templates
-      ref: feat/DTOSS-9518-Automate-Load-Test-Script-Execution-in-ADO-Pipeline
+      ref: main
       endpoint: NHSDigital
 
 variables:
