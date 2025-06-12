@@ -27,6 +27,13 @@ parameters:
       - 4
       - 5
 
+  - name: file
+    type: string
+    default: audit_episodes_20250523.csv
+    values:
+      - audit_episodes_20250523.csv
+      - demo.jsonl
+
   - name: topic
     type: string
     default: events
