@@ -1,0 +1,69 @@
+name: $(Build.SourceBranchName)-$(Date:yyyyMMdd)_$(Rev:r)
+trigger: none
+pr: none
+
+pool:
+  name: private-pool-dev-uks
+
+parameters:
+  - name: rows
+    type: number
+    default: 50000
+    values:
+      - 50000
+      - 100000
+      - 200000
+      - 400000
+      - 500000
+      - 1000000
+
+  - name: concurrency
+    type: number
+    default: 2
+    values:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+
+resources:
+  repositories:
+    - repository: dtos-devops-templates
+      type: github
+      name: NHSDigital/dtos-devops-templates
+      ref: main
+      endpoint: NHSDigital
+
+variables:
+  - group: DEV_service_bulk_load
+
+stages:
+- stage: load_test_service_bus
+  displayName: Load Test Service Bus
+  jobs:
+    - job: bulk_load_job
+      displayName: Run Azure Bulk Load Script
+      steps:
+        - checkout: self
+        - checkout: dtos-devops-templates
+
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.10'
+
+        - script: |
+            python -m pip install --upgrade pip
+            pip install azure-servicebus azure-identity
+          displayName: 'Install Python Dependencies'
+
+        - script: |
+            export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION"
+            python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
+              --topic events \
+              --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
+              --rows ${{ parameters.rows }} \
+              --concurrency ${{ parameters.concurrency }}
+          displayName: 'Run azure_bulk_load.py'
+          env:
+            SERVICE_BUS_CONNECTION: "$(SERVICE_BUS_CONNECTION_STR)"
