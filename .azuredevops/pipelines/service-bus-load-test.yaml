@@ -72,7 +72,7 @@ stages:
             export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION"
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
               --topic ${{ parameters.topic }} \
-              --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
+              --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/${{ parameters.file }} \
               --rows ${{ parameters.rows }} \
               --concurrency ${{ parameters.concurrency }}
           displayName: 'Run azure_bulk_load.py'
