@@ -11,6 +11,7 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
+
 # === ENV Tools ===
 def get_env(key: str, default=None, required=False):
     value = os.getenv(key, default)
@@ -20,9 +21,7 @@ def get_env(key: str, default=None, required=False):
 
 
 N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH"))
-TARGET_DATA_WAREHOUSE = get_env(
-    "TARGET_DATA_WAREHOUSE", default="blob"
-).lower()
+TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
 
 
 def load_foundry_env():
@@ -150,4 +149,3 @@ def generate_file_name() -> str:
     current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     unique_suffix = uuid4().hex[:8]
     return f"batch_{current_time}_{unique_suffix}.json"
-
