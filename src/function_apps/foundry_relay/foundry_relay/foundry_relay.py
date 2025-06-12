@@ -117,6 +117,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
             batch_payloads.append(payload)
         except Exception as e:
             logger.error(f"Error parsing message: {e}")
+
     if not batch_payloads:
         raise ValueError("No valid payloads to process.")
 
