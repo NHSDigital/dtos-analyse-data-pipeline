@@ -45,6 +45,6 @@ while True:
         print(json.dumps(data, indent=2))
 
 
-        result = requests.post(NSP_URL, json = notify.payload)
+        result = requests.post(NSP_URL, json = data)
 
         print('result is ', result)
