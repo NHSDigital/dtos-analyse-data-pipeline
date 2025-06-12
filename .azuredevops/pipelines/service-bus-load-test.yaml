@@ -27,6 +27,10 @@ parameters:
       - 4
       - 5
 
+  - name: topic
+    type: string
+    default: events
+
 resources:
   repositories:
     - repository: dtos-devops-templates
@@ -60,10 +64,11 @@ stages:
         - script: |
             export SERVICE_BUS_CONNECTION_STR="$SERVICE_BUS_CONNECTION"
             python dtos-devops-templates/scripts/azure/azure_bulk_load.py \
-              --topic events \
+              --topic ${{ parameters.topic }} \
               --file dtos-analyse-data-pipeline/infrastructure/environments/cloud/data/audit_episodes_20250523.csv \
               --rows ${{ parameters.rows }} \
               --concurrency ${{ parameters.concurrency }}
           displayName: 'Run azure_bulk_load.py'
           env:
             SERVICE_BUS_CONNECTION: "$(SERVICE_BUS_CONNECTION_STR)"
+
