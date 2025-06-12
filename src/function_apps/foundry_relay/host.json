@@ -6,8 +6,8 @@
   },
   "extensions": {
     "serviceBus": {
-      "prefetchCount": 32,
-      "maxConcurrentCalls": 20000
+      "prefetchCount": 20000,
+      "maxConcurrentCalls": 24
     }
   },
   "logging": {
