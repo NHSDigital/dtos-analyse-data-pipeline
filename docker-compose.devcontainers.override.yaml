@@ -13,7 +13,7 @@ services:
 
     volumes:
       # Update this to wherever you want VS Code to mount the folder of your project
-      - ..:/workspaces:cached
+      - .:/workspaces:cached
 
     # Uncomment the next four lines if you will use a ptrace-based debugger like C++, Go, and Rust.
     # cap_add:
@@ -22,5 +22,23 @@ services:
     #   - seccomp:unconfined
 
     # Overrides default command so things don't shut down after the process ends.
-    # command: sleep infinity
+    command: sleep infinity
+
+  # Update this to the name of the service you want to work with in your docker-compose.yml file
+  service-layer:
+    build:
+      context: .
+      dockerfile: .devcontainer/service-layer/Dockerfile
+    volumes:
+      - .:/workspaces:cached
+    command: sleep infinity
+
+  foundry-relay:
+    build:
+      context: .
+      dockerfile: .devcontainer/foundry-relay/Dockerfile
+    volumes:
+      - .:/workspaces:cached
+    command: sleep infinity
+
 
