@@ -16,3 +16,6 @@ Syft
 Terraform
 toolchain
 Trufflehog
+[dD]ev
+[fF]unc
+[cC]onfig
