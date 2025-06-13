@@ -32,7 +32,10 @@ DELETE FROM subjects WHERE ID = 1;
 
 ## Interactive development
 
-TLDR - Make sure no containers are running. Start VSCode. Run the command `Dev Containers: Reopen in Container`. Chose the container you want.
+### TLDR
+
+Make sure no containers are running. Start VSCode. Run the command `Dev Containers: Reopen in Container`. Chose the container(s) you want to develop in.
+Any Function App containers must be started manually with `func + F5` or debugged via the launch configuration `Attach to Python Functions`.
 
 ### Overview
 
