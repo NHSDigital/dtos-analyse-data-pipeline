@@ -35,34 +35,39 @@ DELETE FROM subjects WHERE ID = 1;
 ### TLDR
 
 Make sure no containers are running. Start VSCode. Run the command `Dev Containers: Reopen in Container`. Chose the container(s) you want to develop in.
-Any Function App containers must be started manually with `func + F5` or debugged via the launch configuration `Attach to Python Functions`.
+Any Function App containers must be started manually with `Func + F5` or debugged via the launch configuration `Attach to Python Functions`.
 
 ### Overview
 
 We use VSCode [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) for interactive local development.
 Specifically, the [Connect to multiple containers](http://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers) option.
-The VScode command `Dev Containers: Add Dev Container Configuration Files...` gives a starter config for each container.
-For more config documentation, see: [json reference](https://containers.dev/implementors/json_reference/).
 In principle, this lets you connect to any container in the [docker-compose](../../../docker-compose.yaml) stack.
-In practice, we only setup connections to the containers we want to develop in:
+In practice, we only set up connections to the containers we want to develop in:
 
 - [bsselect-event-poster](../../../.devcontainer/bsselect-event-poster)
 - [service-layer](../../../.devcontainer/service-layer)
+- [foundry-relay](../../../.devcontainer/foundry-relay)
+
+> [!NOTE] Note - Azure Functions Extension
+> There's a known issue with the Azure Functions Extension. If you see: *Could not find the task \'func: host start\'* then:
+>
+> 1) Uninstall and reinstall the extension
+> 2) Disconnect and reconnect to the container
 
 ### Setting things up
 
-The first time you enter a container, install @recommented VSCode extensions.
+The first time you enter a container, install `@recommended` VSCode extensions.
 
-### Troubleshooting
+### Extending the setup
+
+The VScode command `Dev Containers: Add Dev Container Configuration Files...` gave a starter config for each container.
+Similarly, Azure Function App config comes from `>Azure Functions: Initialize Project for Use with VS Code...`.
+
+## Troubleshooting
 
 - General fixes:
   - Cleaning up containers. E.g. `docker rm --all --force`
   - Checking container logs. E.g. `docker logs -f bsselect-db`
-
-- 'Workspace does not exist'
-  - Run `docker compose down` to avoid VSCode getting confused about duplicate containers.
-
-## Troubleshooting
 
 - If postgres is not initialised correctly, remove the postgres container and run `make` (or `docker compose`) again.
   For more, see [official image docs](https://hub.docker.com/_/postgres#:~:text=starting%20the%20service.-,Warning,-%3A%20scripts%20in%20/docker).
