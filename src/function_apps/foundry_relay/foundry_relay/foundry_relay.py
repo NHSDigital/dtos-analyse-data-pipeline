@@ -3,8 +3,8 @@ import logging
 import os
 from datetime import datetime
 from uuid import uuid4
-from typing import List
 from enum import Enum
+from typing import List, Union, NoReturn, NamedTuple, Optional
 import azure.functions as func
 from azure.storage.blob import BlobServiceClient
 from foundry_sdk import FoundryClient, UserTokenAuth
@@ -12,8 +12,7 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 logger = logging.getLogger(__name__)
 
 
-# === ENV Tools ====
-def get_env(key: str, default=None, required=False):
+def get_env(key: str, default=None, required=False) -> Union[str, NoReturn]:
     value = os.getenv(key, default)
     if required and value is None:
         raise EnvironmentError(f"Missing required environment variable: {key}")
@@ -24,44 +23,57 @@ N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH"))
 TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
 
 
-def load_foundry_env():
-    return {
-        "url": get_env("FOUNDRY_API_URL", required=True),
-        "token": get_env("FOUNDRY_API_TOKEN", required=True),
-        "folder": get_env("FOUNDRY_PARENT_FOLDER_RID", required=True),
-    }
-
-
-def load_blob_env():
-    return {
-        "conn_str": get_env("AZURITE_CONNECTION_STRING", required=True),
-        "container": get_env("AZURITE_CONTAINER_NAME", required=True),
-    }
-
-
-# === Enums & Target Detection ===
 class DataWarehouseTarget(Enum):
     FOUNDRY = "foundry"
     BLOB = "blob"
 
 
-def get_data_warehouse_target() -> DataWarehouseTarget:
+class FoundryEnv(NamedTuple):
+    url: str
+    token: str
+    folder: str
+
+
+class BlobEnv(NamedTuple):
+    conn_str: str
+    container: str
+
+
+def load_foundry_env() -> FoundryEnv:
+    return FoundryEnv(
+        url=get_env("FOUNDRY_API_URL", required=True),
+        token=get_env("FOUNDRY_API_TOKEN", required=True),
+        folder=get_env("FOUNDRY_PARENT_FOLDER_RID", required=True),
+    )
+
+
+def load_blob_env() -> BlobEnv:
+    return BlobEnv(
+        conn_str=get_env("AZURITE_CONNECTION_STRING", required=True),
+        container=get_env("AZURITE_CONTAINER_NAME", required=True),
+    )
+
+
+def get_data_warehouse_target(
+    target_data_warehouse: Optional[str] = None,
+) -> DataWarehouseTarget:
+    if target_data_warehouse is None:
+        target_data_warehouse = TARGET_DATA_WAREHOUSE
     try:
-        return DataWarehouseTarget(TARGET_DATA_WAREHOUSE)
+        return DataWarehouseTarget(target_data_warehouse)
     except ValueError:
         raise ValueError(
-            f"Unsupported TARGET_DATA_WAREHOUSE value: {TARGET_DATA_WAREHOUSE}"
+            f"Unsupported TARGET_DATA_WAREHOUSE value: {target_data_warehouse}"
         )
 
 
-# === Writer Functions ===
 def write_to_foundry(
     file_name: str,
     content: str,
     foundry_url: str,
     api_token: str,
     parent_folder_rid: str,
-):
+) -> None:
     try:
         client = FoundryClient(
             auth=UserTokenAuth(api_token),
@@ -87,7 +99,7 @@ def write_to_blob(
     content: str,
     azurite_connection_string: str,
     azurite_container_name: str,
-):
+) -> None:
     try:
         blob_service_client = BlobServiceClient.from_connection_string(
             azurite_connection_string
@@ -102,12 +114,16 @@ def write_to_blob(
         raise
 
 
-# === Main Function ===
+def generate_file_name() -> str:
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    unique_suffix = uuid4().hex[:8]
+    return f"batch_{current_time}_{unique_suffix}.json"
+
+
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
     logger.info("Foundry batch upload function triggered by Service Bus.")
     target = get_data_warehouse_target()
 
-    # Read and parse all valid messages
     batch_payloads = []
     for serviceBusMessage in serviceBusMessages:
         try:
@@ -121,31 +137,24 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         raise ValueError("No valid payloads to process.")
 
     file_name = generate_file_name()
-    content = json.dumps(batch_payloads, indent=2)
+    content = json.dumps(batch_payloads, separators=(",", ":"))
 
-    try:
-        if target == DataWarehouseTarget.FOUNDRY:
-            env = load_foundry_env()
-            write_to_foundry(
-                file_name, content, env["url"], env["token"], env["folder"]
-            )
-        elif target == DataWarehouseTarget.BLOB:
-            env = load_blob_env()
-            write_to_blob(
-                file_name,
-                content,
-                env["conn_str"],
-                env["container"],
-            )
-        else:
-            raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE: {target}")
-    except Exception as e:
-        logger.error(f"Failed to write to an unknown destination: {e}")
-        raise
-
-
-# === Utility ===
-def generate_file_name() -> str:
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    unique_suffix = uuid4().hex[:8]
-    return f"batch_{current_time}_{unique_suffix}.json"
+    if target == DataWarehouseTarget.FOUNDRY:
+        foundry_env = load_foundry_env()
+        write_to_foundry(
+            file_name,
+            content,
+            foundry_env.url,
+            foundry_env.token,
+            foundry_env.folder,
+        )
+    elif target == DataWarehouseTarget.BLOB:
+        blob_env = load_blob_env()
+        write_to_blob(
+            file_name,
+            content,
+            blob_env.conn_str,
+            blob_env.container,
+        )
+    else:
+        raise ValueError(f"Unsupported TARGET_DATA_WAREHOUSE: {target}")
