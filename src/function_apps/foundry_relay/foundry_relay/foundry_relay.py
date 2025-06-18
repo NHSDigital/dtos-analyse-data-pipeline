@@ -137,7 +137,7 @@ def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
         raise ValueError("No valid payloads to process.")
 
     file_name = generate_file_name()
-    content = json.dumps(batch_payloads, separators=(",", ":"))
+    content = json.dumps(batch_payloads, indent=1)
 
     if target == DataWarehouseTarget.FOUNDRY:
         foundry_env = load_foundry_env()
