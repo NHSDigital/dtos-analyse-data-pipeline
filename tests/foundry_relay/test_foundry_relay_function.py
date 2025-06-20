@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import json
 from http import HTTPStatus
 import azure.functions as func
-from FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction import main
+from foundry_relay.foundry_relay.foundry_relay import main
 
 @pytest.fixture
 def mock_request():
@@ -18,9 +18,9 @@ def mock_request():
 
 def test_happy_path_with_foundry_upload(mock_request):
     """Test the main function for a successful file upload with Foundry upload enabled."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.BlobServiceClient") as mock_blob_service_client:
+    with patch("foundry_relay.foundry_relay.foundry_relay.os.getenv") as mock_getenv, \
+    patch("foundry_relay.foundry_relay.foundry_relay.FoundryClient") as mock_foundry_client, \
+    patch("foundry_relay.foundry_relay.foundry_relay.BlobServiceClient") as mock_blob_service_client:
 
         # Mock environment variables
         mock_getenv.side_effect = lambda key, default=None: {
@@ -51,9 +51,9 @@ def test_happy_path_with_foundry_upload(mock_request):
 
 def test_happy_path_skip_foundry_upload(mock_request):
     """Test the main function for a successful file upload with Foundry upload skipped."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.BlobServiceClient") as mock_blob_service_client:
+    with patch("foundry_relay.foundry_relay.foundry_relay.os.getenv") as mock_getenv, \
+    patch("foundry_relay.foundry_relay.foundry_relay.FoundryClient") as mock_foundry_client, \
+    patch("foundry_relay.foundry_relay.foundry_relay.BlobServiceClient") as mock_blob_service_client:
 
         # Mock environment variables
         mock_getenv.side_effect = lambda key, default=None: {
@@ -80,7 +80,7 @@ def test_happy_path_skip_foundry_upload(mock_request):
 
 def test_main_missing_env_vars(mock_request):
     """Test the main function when environment variables are missing."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv:
+    with patch("foundry_relay.foundry_relay.foundry_relay.os.getenv") as mock_getenv:
 
         # Mock environment variables to return None
         mock_getenv.side_effect = lambda key, default=None: None
@@ -94,7 +94,7 @@ def test_main_missing_env_vars(mock_request):
 
 def test_main_invalid_payload():
     """Test the main function with an invalid payload."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv:
+    with patch("foundry_relay.foundry_relay.foundry_relay.os.getenv") as mock_getenv:
 
         # Mock environment variables
         mock_getenv.side_effect = lambda key, default=None: {
@@ -123,8 +123,8 @@ def test_main_invalid_payload():
         assert "Invalid JSON payload" in response.get_body().decode("utf-8")
 def test_main_foundry_upload_failure(mock_request):
     """Test the main function when the Foundry upload fails."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client:
+    with patch("foundry_relay.foundry_relay.foundry_relay.os.getenv") as mock_getenv, \
+    patch("foundry_relay.foundry_relay.foundry_relay.FoundryClient") as mock_foundry_client:
 
         # Mock environment variables
         mock_getenv.side_effect = lambda key, default=None: {
@@ -151,9 +151,9 @@ def test_main_foundry_upload_failure(mock_request):
 
 def test_main_blob_upload_failure(mock_request):
     """Test the main function when the Blob Storage upload fails."""
-    with patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.os.getenv") as mock_getenv, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.FoundryClient") as mock_foundry_client, \
-    patch("FoundryIntegrationService.FoundryRelayFunction.foundryRelayFunction.BlobServiceClient") as mock_blob_service_client:
+    with patch("foundry_relay.foundry_relay.foundry_relay.os.getenv") as mock_getenv, \
+    patch("foundry_relay.foundry_relay.foundry_relay.FoundryClient") as mock_foundry_client, \
+    patch("foundry_relay.foundry_relay.foundry_relay.BlobServiceClient") as mock_blob_service_client:
 
         # Mock environment variables
         mock_getenv.side_effect = lambda key, default=None: {
