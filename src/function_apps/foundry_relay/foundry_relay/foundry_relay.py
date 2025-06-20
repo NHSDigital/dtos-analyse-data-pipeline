@@ -11,14 +11,13 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
-N_RECORDS_PER_BATCH = 10
-TARGET_DATA_WAREHOUSE = 'blob'
 
 def get_env(key: str, default=None, required=False) -> Union[str, NoReturn]:
     value = os.getenv(key, default)
     if required and value is None:
         raise EnvironmentError(f"Missing required environment variable: {key}")
     return value
+
 
 class DataWarehouseTarget(Enum):
     FOUNDRY = "foundry"
@@ -55,7 +54,7 @@ def get_data_warehouse_target(
     target_data_warehouse: Optional[str] = None,
 ) -> DataWarehouseTarget:
     if target_data_warehouse is None:
-        target_data_warehouse = TARGET_DATA_WAREHOUSE
+        target_data_warehouse = get_env("TARGET_DATA_WAREHOUSE", required=True).lower()
     try:
         return DataWarehouseTarget(target_data_warehouse)
     except ValueError:
@@ -118,10 +117,6 @@ def generate_file_name() -> str:
 
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
-    global N_RECORDS_PER_BATCH
-    N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH",10))
-    global TARGET_DATA_WAREHOUSE
-    TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
 
     logger.info("Foundry batch upload function triggered by Service Bus.")
     target = get_data_warehouse_target()
