@@ -19,7 +19,7 @@ def get_env(key: str, default=None, required=False) -> Union[str, NoReturn]:
     return value
 
 
-N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH"))
+N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH",10))
 TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
 
 

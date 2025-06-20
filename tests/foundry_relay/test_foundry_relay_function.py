@@ -3,7 +3,7 @@ from unittest.mock import patch, MagicMock
 import json
 from http import HTTPStatus
 import azure.functions as func
-from foundry_relay.foundry_relay.foundry_relay import main
+from function_apps.foundry_relay.foundry_relay import main
 
 @pytest.fixture
 def mock_request():

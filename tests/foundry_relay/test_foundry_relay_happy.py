@@ -15,6 +15,8 @@ Covers:
 - Missing Foundry env‐vars path (falls back to Blob)
 """
 
+from __future__ import annotations
+
 import sys
 import types
 import importlib
@@ -80,8 +82,6 @@ src/function_apps/foundry_relay/foundry_relay/foundry_relay.py
 * 4 scenarios that exercise common and error branches; should lift
 overall coverage to ~80 %+
 """
-
-from __future__ import annotations
 
 import importlib
 import json
@@ -193,7 +193,6 @@ def test_blob_only(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
     (Production code still constructs FoundryClient, but we don't assert on it here.)
     """
     monkeypatch.setenv("TARGET_DATA_WAREHOUSE", "blob")
-    monkeypatch.setenv("ENVIRONMENT", "local")
     monkeypatch.setenv("AZURITE_CONNECTION_STRING", "fake-conn")
     monkeypatch.setenv("AZURITE_CONTAINER_NAME", "inbound")
     monkeypatch.setenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
@@ -214,34 +213,25 @@ def test_blob_only(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
     "function_apps.foundry_relay.foundry_relay.foundry_relay.FoundryClient",
     _FakeFoundryClient,
 )
-@patch(
-    "function_apps.foundry_relay.foundry_relay.foundry_relay.BlobServiceClient",
-    _FakeBlobServiceClient,
-)
-def test_foundry_plus_blob(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
+def test_foundry_only(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
     """
-    TARGET_DATA_WAREHOUSE=foundry + ENVIRONMENT=local ⇒
-    both FoundryClient and BlobServiceClient paths should run.
+    TARGET_DATA_WAREHOUSE=foundry
+    only FoundryClient path should run.
     """
     monkeypatch.setenv("TARGET_DATA_WAREHOUSE", "foundry")
-    monkeypatch.setenv("ENVIRONMENT", "local")
     monkeypatch.setenv("FOUNDRY_API_URL", "fake-url")
     monkeypatch.setenv("FOUNDRY_API_TOKEN", "fake-token")
     monkeypatch.setenv("FOUNDRY_PARENT_FOLDER_RID", "fake-rid")
-    monkeypatch.setenv("AZURITE_CONNECTION_STRING", "fake-conn")
-    monkeypatch.setenv("AZURITE_CONTAINER_NAME", "inbound")
     monkeypatch.setenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
 
-    # Reset hit flags
-    _FakeBlobServiceClient.hit = False
+    # Reset hit flag
     _FakeFoundryClient.hit = False
     setattr(relay, "write_destinations", [])
 
     # Run production code
     main([sample_message])
 
-    # Both back‐ends should have been invoked
-    assert _FakeBlobServiceClient.hit is True
+    # Only foundry path should have been invoked
     assert _FakeFoundryClient.hit is True
 
 
