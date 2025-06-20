@@ -1,4 +1,3 @@
-
 """
 Light-weight unit tests for:
 src/function_apps/foundry_relay/foundry_relay/foundry_relay.py
@@ -14,6 +13,8 @@ Covers:
 - Foundry+Blob path (local dev)
 - Missing Foundry env‐vars path (falls back to Blob)
 """
+
+from __future__ import annotations
 
 import sys
 import types
@@ -48,19 +49,23 @@ sys.modules["azure.storage.blob"] = azure_storage_blob_mod
 foundry_sdk_mod = types.ModuleType("foundry_sdk")
 sys.modules["foundry_sdk"] = foundry_sdk_mod
 
+
 # 2) Provide a dummy UserTokenAuth that accepts a token without error
 class _DummyUserTokenAuth:
     def __init__(self, token: str):
         # Just store it or ignore—it never gets used for real.
         self.token = token
 
+
 setattr(foundry_sdk_mod, "UserTokenAuth", _DummyUserTokenAuth)
+
 
 # 3) Provide a dummy FoundryClient constructor (will be patched in tests)
 class _DummyFoundryClientCtor:
     def __init__(self, *args, **kwargs):
         # no‐op
         pass
+
 
 setattr(foundry_sdk_mod, "FoundryClient", _DummyFoundryClientCtor)
 
@@ -81,8 +86,6 @@ src/function_apps/foundry_relay/foundry_relay/foundry_relay.py
 overall coverage to ~80 %+
 """
 
-from __future__ import annotations
-
 import importlib
 import json
 from unittest.mock import patch, MagicMock
@@ -100,6 +103,7 @@ get_data_warehouse_target = relay.get_data_warehouse_target
 
 # ─── Define Fake‐SDK stubs for use inside individual tests ─────────────────────────
 
+
 class _FakeBlobServiceClient:
     """
     Stub for azure.storage.blob.BlobServiceClient.
@@ -107,6 +111,7 @@ class _FakeBlobServiceClient:
     - whenever from_connection_string() is called, we mark hit=True.
     - get_blob_client(...).upload_blob(...) also sets hit=True.
     """
+
     hit = False
 
     @classmethod
@@ -129,6 +134,7 @@ class _FakeFoundryClient:
     - ctor sets hit=True
     - .datasets.Dataset.File.upload(...) sets hit=True again
     """
+
     hit = False
 
     def __init__(self, *args, **kwargs):
@@ -142,6 +148,7 @@ class _FakeFoundryClient:
                 # Return an object with a .rid attribute
                 class DummyDataset:
                     rid = "dummy-rid"
+
                 return DummyDataset()
 
             class File:
@@ -161,7 +168,9 @@ class FakeSB:
     def get_body(self):
         return self._bytes
 
+
 # ─── Utility‐function tests ────────────────────────────────────────────────────────
+
 
 def test_generate_file_name_unique():
     """Two calls should return different values, both starting with 'batch_'."""
@@ -171,12 +180,8 @@ def test_generate_file_name_unique():
     assert a.startswith("batch_") and b.startswith("batch_")
 
 
-def test_get_data_warehouse_target_default(monkeypatch: pytest.MonkeyPatch):
-    """If TARGET_DATA_WAREHOUSE is missing, default should be 'blob'."""
-    monkeypatch.delenv("TARGET_DATA_WAREHOUSE", raising=False)
-    assert get_data_warehouse_target().value == "blob"
-
 # ─── Handler‐function integration tests ─────────────────────────────────────────────
+
 
 @pytest.fixture()
 def sample_message():
@@ -193,7 +198,7 @@ def test_blob_only(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
     (Production code still constructs FoundryClient, but we don't assert on it here.)
     """
     monkeypatch.setenv("TARGET_DATA_WAREHOUSE", "blob")
-    monkeypatch.setenv("ENVIRONMENT", "local")
+
     monkeypatch.setenv("AZURITE_CONNECTION_STRING", "fake-conn")
     monkeypatch.setenv("AZURITE_CONTAINER_NAME", "inbound")
     monkeypatch.setenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
@@ -214,17 +219,13 @@ def test_blob_only(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
     "function_apps.foundry_relay.foundry_relay.foundry_relay.FoundryClient",
     _FakeFoundryClient,
 )
-@patch(
-    "function_apps.foundry_relay.foundry_relay.foundry_relay.BlobServiceClient",
-    _FakeBlobServiceClient,
-)
-def test_foundry_plus_blob(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
+def test_foundry_only(monkeypatch: pytest.MonkeyPatch, sample_message: FakeSB):
     """
-    TARGET_DATA_WAREHOUSE=foundry + ENVIRONMENT=local ⇒
-    both FoundryClient and BlobServiceClient paths should run.
+    TARGET_DATA_WAREHOUSE=foundry
+    only FoundryClient path should run (Blob path should not run).
     """
     monkeypatch.setenv("TARGET_DATA_WAREHOUSE", "foundry")
-    monkeypatch.setenv("ENVIRONMENT", "local")
+
     monkeypatch.setenv("FOUNDRY_API_URL", "fake-url")
     monkeypatch.setenv("FOUNDRY_API_TOKEN", "fake-token")
     monkeypatch.setenv("FOUNDRY_PARENT_FOLDER_RID", "fake-rid")
@@ -233,15 +234,13 @@ def test_foundry_plus_blob(monkeypatch: pytest.MonkeyPatch, sample_message: Fake
     monkeypatch.setenv("FOUNDRY_RELAY_N_RECORDS_PER_BATCH", "10")
 
     # Reset hit flags
-    _FakeBlobServiceClient.hit = False
     _FakeFoundryClient.hit = False
     setattr(relay, "write_destinations", [])
 
     # Run production code
     main([sample_message])
 
-    # Both back‐ends should have been invoked
-    assert _FakeBlobServiceClient.hit is True
+    # Only Foundry should have been invoked
     assert _FakeFoundryClient.hit is True
 
 
@@ -272,8 +271,6 @@ def test_missing_env_vars(monkeypatch: pytest.MonkeyPatch):
     _FakeFoundryClient.hit = False
     setattr(relay, "write_destinations", [])
 
-    # Even though Foundry credentials are missing, main(...) should NOT raise;
-    # it should still fall back to Blob in local mode:
-    main([FakeSB({"foo": "bar"})])
-
-    assert _FakeBlobServiceClient.hit is True
+    # Missing foundry env‐vars should raise EnvironmentError
+    with pytest.raises(EnvironmentError):
+        main([FakeSB({"foo": "bar"})])

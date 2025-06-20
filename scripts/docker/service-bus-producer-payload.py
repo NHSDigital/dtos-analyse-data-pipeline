@@ -12,7 +12,7 @@ if not connection_str:
     raise ValueError("Missing SERVICE_BUS_CONNECTION_STR in .env file")
 
 # Path to the payload.json file
-payload_file = "src/FoundryIntegrationService/payload.json"
+payload_file = "infrastructure/environments/local/payload.json"
 
 # Read the payload from the JSON file
 if not os.path.exists(payload_file):

@@ -19,10 +19,6 @@ def get_env(key: str, default=None, required=False) -> Union[str, NoReturn]:
     return value
 
 
-N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH"))
-TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
-
-
 class DataWarehouseTarget(Enum):
     FOUNDRY = "foundry"
     BLOB = "blob"
@@ -58,7 +54,7 @@ def get_data_warehouse_target(
     target_data_warehouse: Optional[str] = None,
 ) -> DataWarehouseTarget:
     if target_data_warehouse is None:
-        target_data_warehouse = TARGET_DATA_WAREHOUSE
+        target_data_warehouse = get_env("TARGET_DATA_WAREHOUSE", required=True).lower()
     try:
         return DataWarehouseTarget(target_data_warehouse)
     except ValueError:
@@ -121,6 +117,7 @@ def generate_file_name() -> str:
 
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
+
     logger.info("Foundry batch upload function triggered by Service Bus.")
     target = get_data_warehouse_target()
 
