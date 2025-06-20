@@ -78,7 +78,7 @@ src/function_apps/foundry_relay/foundry_relay/foundry_relay.py
 
 * Stub-only: never touches real Azure / Foundry
 * 4 scenarios that exercise common and error branches; should lift
-  overall coverage to ~80 %+
+overall coverage to ~80 %+
 """
 
 from __future__ import annotations
