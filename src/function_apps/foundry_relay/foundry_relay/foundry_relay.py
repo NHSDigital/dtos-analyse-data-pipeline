@@ -18,11 +18,6 @@ def get_env(key: str, default=None, required=False) -> Union[str, NoReturn]:
         raise EnvironmentError(f"Missing required environment variable: {key}")
     return value
 
-
-N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH",10))
-TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
-
-
 class DataWarehouseTarget(Enum):
     FOUNDRY = "foundry"
     BLOB = "blob"
@@ -121,6 +116,11 @@ def generate_file_name() -> str:
 
 
 def main(serviceBusMessages: List[func.ServiceBusMessage]) -> None:
+    global N_RECORDS_PER_BATCH
+    N_RECORDS_PER_BATCH = int(get_env("FOUNDRY_RELAY_N_RECORDS_PER_BATCH",10))
+    global TARGET_DATA_WAREHOUSE
+    TARGET_DATA_WAREHOUSE = get_env("TARGET_DATA_WAREHOUSE", default="blob").lower()
+
     logger.info("Foundry batch upload function triggered by Service Bus.")
     target = get_data_warehouse_target()
 
