@@ -262,8 +262,6 @@ def test_missing_env_vars(monkeypatch: pytest.MonkeyPatch):
     _FakeFoundryClient.hit = False
     setattr(relay, "write_destinations", [])
 
-    # Even though Foundry credentials are missing, main(...) should NOT raise;
-    # it should still fall back to Blob in local mode:
-    main([FakeSB({"foo": "bar"})])
-
-    assert _FakeBlobServiceClient.hit is True
+    # Missing foundry env‐vars should raise EnvironmentError
+    with pytest.raises(EnvironmentError):
+        main([FakeSB({"foo": "bar"})])

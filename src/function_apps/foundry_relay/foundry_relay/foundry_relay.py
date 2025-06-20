@@ -11,6 +11,8 @@ from foundry_sdk import FoundryClient, UserTokenAuth
 
 logger = logging.getLogger(__name__)
 
+N_RECORDS_PER_BATCH = 10
+TARGET_DATA_WAREHOUSE = 'blob'
 
 def get_env(key: str, default=None, required=False) -> Union[str, NoReturn]:
     value = os.getenv(key, default)
