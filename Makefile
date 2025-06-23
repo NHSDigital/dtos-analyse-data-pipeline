@@ -33,7 +33,7 @@ config:: # Configure development environment (main) @Configuration
 install-dependencies: # Install dependencies needed to build and test the project
 	@echo "Installing dependencies..."
 	@echo "Installing Python dependencies..."
-	pip install -r src/FoundryIntegrationService/requirements.txt
+	pip install -r src/foundry_relay/requirements.txt
 	@echo "All project dependencies are installed."
 
 build-local-containers: # Build all containers defined in docker-compose.yaml
@@ -65,7 +65,7 @@ curl-relay-function: # Send a POST request to the Foundry Relay Function
 	@echo "Testing the Foundry Relay Function with curl..."
 	curl -X POST http://localhost:7071/api/FoundryRelayFunction \
 	-H "Content-Type: application/json" \
-	--data @src/function_apps/FoundryIntegrationService/payload.json
+	--data @infrastructure/environments/local/payload.json
 	@echo "Request sent. Check the logs or response for details."
 
 curl-service-layer-function: # Send a POST request to the Service Layer Function
@@ -94,7 +94,7 @@ scale-foundry-relay-down: # Scale foundry-relay service down to 0 replicas
 
 run-unit-tests: # Run all unit tests with pytest
 	@echo "Running all unit tests with pytest..."
-	# pytest tests/FoundryIntegrationService/test_foundry_relay_function.py
+	# pytest tests/foundry_relay/test_foundry_relay_function.py
 	pytest
 	@echo "Unit tests completed."
 

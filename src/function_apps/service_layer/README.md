@@ -32,10 +32,10 @@ Example:
 
 ## 3. Run the Azure Function Locally
 
-Navigate to the `FoundryIntegrationService` directory and start the Azure Function:
+Navigate to the `service_layer` directory and start the Azure Function:
 
 ```bash
-cd src/FoundryIntegrationService
+cd src/service_layer
 func start
 ```
 

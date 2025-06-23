@@ -32,10 +32,10 @@ Example:
 
 ## 3. Run the Azure Function Locally
 
-Navigate to the `FoundryIntegrationService` directory and start the Azure Function:
+Navigate to the `foundry_relay` directory and start the Azure Function:
 
 ```bash
-cd src/FoundryIntegrationService
+cd src/foundry_relay
 func start
 ```
 
@@ -66,7 +66,7 @@ curl -X POST http://localhost:7071/api/FoundryRelayFunction \
 To ensure the function behaves as expected, run the unit tests using `pytest`:
 
 ```bash
-pytest tests/FoundryIntegrationService/test_foundry_relay_function.py
+pytest tests/foundry_relay/test_foundry_relay_function.py
 ```
 
 ## Troubleshooting
