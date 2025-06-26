@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+      - name: Install Python dependencies
+        run: |
+          pip install pytest pytest-cov
       - name: "Run unit test suite"
         run: |
           make test-unit
