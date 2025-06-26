@@ -17,4 +17,5 @@ cd "$(git rev-parse --show-toplevel)"
 # tests from here. If you want to run other test suites, see the predefined
 # tasks in scripts/test.mk.
 
-echo "Unit tests are not yet implemented. See scripts/tests/unit.sh for more."
+make run-unit-tests
+echo "Unit tests are now implemented. See scripts/tests/unit.sh for more."

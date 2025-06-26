@@ -95,7 +95,7 @@ scale-foundry-relay-down: # Scale foundry-relay service down to 0 replicas
 run-unit-tests: # Run all unit tests with pytest
 	@echo "Running all unit tests with pytest..."
 	# pytest tests/foundry_relay/test_foundry_relay_function.py
-	pytest
+	pytest --cov
 	@echo "Unit tests completed."
 
 local-pipeline-end-to-end-fdp: # Run a local Azure Function App with containers and test it
