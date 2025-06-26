@@ -3,7 +3,6 @@ import requests
 import pytest
 import json
 import os
-import subprocess
 import time
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
@@ -11,18 +10,6 @@ from dotenv import load_dotenv
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env'))
 
 scenarios('features/EndToEndSmokeTest.feature')
-
-"""
-@pytest.fixture(scope="session", autouse=True)
-def podman_compose_up_and_down():
-    # Start services
-    subprocess.run(["podman", "compose", "-f", "docker-compose.yaml", "up", "-d"], check=True)
-    # Wait for services to be ready (adjust sleep as needed or implement health checks)
-    time.sleep(100)
-    yield
-    # Tear down services
-    subprocess.run(["podman", "compose", "-f", "docker-compose.yaml", "down"], check=True)
-"""""
 
 @pytest.fixture
 def context():
@@ -40,7 +27,8 @@ def post_payload_from_file(context, payload_file, endpoint):
     with open(payload_path, 'r') as f:
         payload = json.load(f)
     url = f'http://localhost:7072{endpoint}'
-    response = requests.post(url, json=payload)
+    for i in range(10):
+        response = requests.post(url, json=payload)
     context['response'] = response
 
 
@@ -49,12 +37,14 @@ def check_status_code(context, status_code):
     assert context['response'].status_code == status_code
 
 @then('the content of file uploaded to blob storage should match with the request payload')
-def read_first_blob_from_container(context):
+def read_first_blob_from_container():
     connection_string = os.getenv("AZURITE_CONNECTION_LOCAL_STRING")
     assert connection_string, "AZURITE_CONNECTION_LOCAL_STRING not set"
 
     blob_service_client = BlobServiceClient.from_connection_string(connection_string)
     container_client = blob_service_client.get_container_client("inbound")
+
+    time.sleep(20)  # Wait for the file to be processed and uploaded to blob storage
 
     # Get the first blob in the container
     blobs = list(container_client.list_blobs())
@@ -66,11 +56,11 @@ def read_first_blob_from_container(context):
     blob_data = blob_client.download_blob().readall()
     content = blob_data.decode('utf-8')  # For text files
 
-    print(f"First blob name: {first_blob_name}")
-    print("Content:")
-    print(content)
+    data=json.loads(content)
     payload_path = os.path.join(os.path.dirname(__file__), 'payloads/sample_payload.json')
     with open(payload_path, 'r') as f:
         payload = json.load(f)
-    assert json.dumps(payload) == content
+
+    # First record from the uploaded blob file compared with payload (event)
+    assert payload == data[0]
     return content
