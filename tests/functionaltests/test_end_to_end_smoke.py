@@ -27,8 +27,7 @@ def post_payload_from_file(context, payload_file, endpoint):
     with open(payload_path, 'r') as f:
         payload = json.load(f)
     url = f'http://localhost:7072{endpoint}'
-    for i in range(10):
-        response = requests.post(url, json=payload)
+    response = requests.post(url, json=payload)
     context['response'] = response
 
 
@@ -38,10 +37,12 @@ def check_status_code(context, status_code):
 
 @then('the content of file uploaded to blob storage should match with the request payload')
 def read_first_blob_from_container():
-    connection_string = os.getenv("AZURITE_CONNECTION_LOCAL_STRING")
-    assert connection_string, "AZURITE_CONNECTION_LOCAL_STRING not set"
+    connection_string = os.getenv("AZURITE_CONNECTION_STRING")
+    assert connection_string, "AZURITE_CONNECTION_STRING not set"
 
-    blob_service_client = BlobServiceClient.from_connection_string(connection_string)
+    azurite_local_connection_string = connection_string.replace("azurite", "localhost")
+
+    blob_service_client = BlobServiceClient.from_connection_string(azurite_local_connection_string)
     container_client = blob_service_client.get_container_client("inbound")
 
     time.sleep(20)  # Wait for the file to be processed and uploaded to blob storage
