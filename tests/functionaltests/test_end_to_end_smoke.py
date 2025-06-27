@@ -62,6 +62,5 @@ def read_first_blob_from_container():
     with open(payload_path, 'r') as f:
         payload = json.load(f)
 
-    # First record from the uploaded blob file compared with payload (event)
-    assert payload == data[0]
+    assert payload == data[0], "File content from blob storage should match payload posted"
     return content
