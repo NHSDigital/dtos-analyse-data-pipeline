@@ -18,4 +18,4 @@ cd "$(git rev-parse --show-toplevel)"
 # tasks in scripts/test.mk.
 
 echo "Running unit tests"
-pytest
+pytest tests/foundry_relay --cov=src
