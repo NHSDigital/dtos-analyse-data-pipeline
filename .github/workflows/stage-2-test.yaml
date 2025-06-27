@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: "Checkout code"
         uses: actions/checkout@v4
+      - name: Install Python packages for Foundry Relay only
+        run: |
+          pip install -r src/function_apps/foundry_relay/requirements.txt
       - name: "Run unit test suite"
         run: |
           make test-unit
